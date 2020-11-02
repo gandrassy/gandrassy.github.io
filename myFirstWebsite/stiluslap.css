@@ -1,0 +1,79 @@
+/* global definiciok */
+body { 
+    z-index: -1;  
+    background-image: url("assets/topography.png");
+}
+
+hr {
+    border-top: 1px dashed;
+    width: 30px;
+}
+
+h1 {
+  font-size: 48px;
+}
+h2 {
+  font-size: 40px;
+}
+h3 {
+  font-size: 32px;
+}
+h4 {
+  font-size: 28px;
+}
+
+img {
+    width: 100%;
+}
+
+/* nav barra vontkozo definiciok*/
+.fejlec {
+    position: fixed; 
+    z-index: 1;
+    background-color: #333333; 
+    font-family: 'Hind Vadodara', Courier, monospace;
+    width: 99%;
+    padding: 0 10%;
+}
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    /* width: 200px; */
+  }
+li {
+    float: left;
+  }
+li a {
+    display: block;
+    color:#ff0099;
+    text-align: center;
+    height: 50px;
+    padding: 14px 16px 0px;
+    text-decoration: none;
+    font-size: 22px;
+  }
+  
+  /* Change the link color on hover */
+li a:hover {
+    background-color: #555;
+    color: white;
+  }
+
+.active {
+    background-color: #454545;
+  }
+
+
+/* tartalomra vonatkozo definiciok */
+.tartalom {
+    position: absolute;
+    top: 40px;
+    z-index: 0;
+    padding: 10% 10%;
+    text-align: justify;
+    font-family: 'Hind Vadodara', Courier, monospace;
+    line-height: 1.6;
+    font-size: 22px;
+}
