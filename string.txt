@@ -1,0 +1,121 @@
+
+
+String
+======
+
+Tulajdonképpen egy karakterekből álló objektum, vagyis:   String s = new String();
+
+char adat[] = {'a', 'b', 'c'};
+String abc = new String(data);
+
+A string tartalma megváltoztathatatlan.
+Ha azt írom, hogy abc += "def" akkor nem összefűzés történik, hanem létrejön egy új objektum, és az abc változóhoz annak a címe rendeltetik.
+E közben az eredeti abc által mutatott memóriaterületen még ott marad az eredeti "abc" tartalom. (amelyet idővel az os recyclál majd)
+
+speciális karakterek (string literalok)
+ \n = sortörés
+ \t = tabulátor
+ \" = " karakter
+ \\ = \ karakter
+
+operátorok: 
+-----------
+
+A primitív típusok operátorai objektumokra korlátozottan használhatók.
+
+s1 == s2   helyett  s1.equals(s2) 
+s1 + s2    helyett  s1.concat(s2)   (gyorsabb, mint a + )
+
+s1.length() - megadja a string hosszát
+
+s1.charAt(1) - a string második karaktere (üres stringre meghívva indexelési hibát ad)
+
+
+stringek összehasonlíthatók betűrendi sor szempontjából is, pl:
+---------------------------------------------------------------
+  String s1 = "Géza";
+  String s2 = "Béla";
+
+  s1.compareTo(s2)  // az eredmény +5, ami azt jelenti, hogy az s1 ötödik betűvel (C,D,E,F,G) hátrébb van az s2-nél.
+
+  A függvény case sensitive, a kis betűk a nagy betűtől hátrébb vannak a kódtáblájában.
+  ha számít, akkor a compareToIgnoreCase(); metódus használandó helyette.
+
+kis és nagybetűs átalakítás:
+----------------------------
+  toLowerCase() és toUpperCase()
+
+töredék keresése egy stringben:
+-------------------------------
+  String s = "abrakadabra";
+  System.out.println(s.indexOf("rak")); // =2, mert a 2. indexű (3. karakternél) található a rak szócska. mindig az első találat helyét adja meg. -1, ha nincs benne
+
+  a lastIndexOf() a string végéről keres.
+
+  Mindkettőnek megadható az, hogy honnan keressen, például:
+
+  int elsoTalalat = s.indexOf("r");
+  System.out.println(s.indexOf("r", elsoTalalat + 1));  //megkeresi a második r betűt
+
+  A string eleje és vége külön metódusokkal is vizsgálható:
+  System.out.println(s.startsWith("ab")); // true
+  System.out.println(s.endsWith("ab")); // false
+
+  vagy bárhol belül:
+  System.out.println(s.contains("rak")); // true
+
+  ismeretlen case stringet először kicsivé alakítunk, úgy keresünk benne: s.toLowerCase().contains("abrak")
+
+Karaktereinek cseréje
+---------------------
+
+  s.replace("a","A")     // minden a-t kicserél A-ra
+  replaceFirst("a","A")  // csak az első találatot cseréli ki
+
+string egy részének kinyerése:
+------------------------------
+  s.substring(0,5)
+
+string darabolása 
+------------------
+
+  elválasztó karakterek szerint:
+
+  String nevsor = "Geza Eva Pal";
+  String[] nevek = nevsor.split(" ");  // az eredmény egy tömb: { "Geza", "Eva", "Pal" }
+
+  megadható, hogy a tömbnek hány eleme legyen, pl:
+
+  String s = "abrakadabra";
+  String[] tomb;
+  tomb = s.split("a", 1); // { "abrakadabra" } 1 darab
+  tomb = s.split("a", 3); // { "", "br", "kadabra" } 3 darab
+  tomb = s.split("a", 5); // { "", "br", "k", "d", "bra" } 5 darab
+  tomb = s.split("a", 8); // { "", "br", "k", "d", "br", "" } 6 darab,
+                          // de nem 8, mert nincs annyi töréspont!
+
+  KIVÉTELEK: "." "|" és "\"
+
+  String s = "abra.kad.abra";
+  String[] tomb;
+  tomb = s.split("\\."); // { "abra", "kad", "abra" }
+ 
+  s = "abra|kad|abra";
+  tomb = s.split("\\|"); // { "abra", "kad", "abra" }
+ 
+  s = "abra\\kad\\abra"; // már a megadáskor ügyelni kell a \ jelre!
+  tomb = s.split("\\\\"); // { "abra", "kad", "abra" }
+
+  (Ha egy fájlból beolvasott Stringben vannak ilyen jelek, akkor nem kell kivételként megadni, tehát a fájlban elég, ha így szerepel: abra\ka\dabra )
+
+
+  Több határoló együttes használata
+
+  String s = "123a4a56b78b9a0";
+  String[] darabok = s.split("a|b|c");   // annyi a teendőnk, hogy egy | jellel elválasztottuk egymástól a határolókat  {"123", "4", "56", "78", "9", "0"}
+
+String karakterekre bontása
+
+  String s = "hokusz";
+  char[] tomb = s.toCharArray(); // { 'h', 'o', 'k', 'u', 's', 'z' }
+

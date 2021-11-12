@@ -1,0 +1,184 @@
+
+ORM: egy olyan cucc, ami automatikusan objektummá konvertálja az adatbázis sorait - és vica versa.
+
+interfésze a JPA (java persistens api), megvalósítása több is van, pl. a Hibernate, Eclipsel.ink, OpenJPA
+
+Project létrehozásakor be kell pipálni a SPRING BOOT STARTER DATA JPA dependency-t ÉS a H2 dependency-t vagy a mysql-connector-t
+--------------------------------------------------------------------------------------------------------------------------------
+
+Az src/main/resources/application.properties fileban definiálja:
+
+  # H2 temporary data storage memóriában vagy file-ban
+  # spring.datasource.url = jdbc:h2:mem:testdb
+  spring.datasource.url = jdbc:h2:file:E:/greenfox/munkaterulet/gandrassy/week-16/ListingTodosWithH2/data/sample
+  spring.datasource.driverClassName=org.h2.Driver
+
+  spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+
+  # H2 adatbázis kezelőkonzoljának végpontja
+  spring.h2.console.enabled=true
+  spring.h2.console.path=/dbconsole
+
+  spring.datasource.username=sa
+  spring.datasource.password= 
+
+  # ez azért kell, hogy kreálja meg magának az adatbázisát
+  spring.jpa.hibernate.ddl-auto=update
+
+
+--- ugyanez mySQL használata esetén ---
+
+  spring.datasource.username=root
+  spring.datasource.password=foxi2maxi
+
+  spring.datasource.url=jdbc:mysql://${MYSQL_HOST:localhost}:3306/todoapp?serverTimezone=UTC
+  spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5Dialect
+  spring.logging.level.org.hibernate.SQL=debug
+  spring.jpa.show-sql=true
+
+  # at first
+  # spring.jpa.hibernate.ddl-auto=create-drop
+  # then
+  spring.jpa.hibernate.ddl-auto=update
+
+---
+
+
+A grafikus felületre belépéskor mindig át kell írni a JDBC URL-t:
+  jdbc:h2:mem:testdb VAGY jdbc:h2:file:E:/greenfox/munkaterulet/gandrassy/week-16/ListingTodosWithH2/data/sample
+
+A h2 mem adatbázis minden újraindítással törlődik, de ha a resurces/data.sql-be felírom az INSERT-eket, 
+akkor indításkor automatikusan feltölti abból
+
+
+A springboot összekötése az adatbázishoz
+========================================
+
+Az objektumnak kell lennie konstruktorának, mégpedig egy private konstruktorának:
+
+@Entity                      // javax.persistence.Entity importálandó. Van másik is, de ez kell!
+public class Story {
+
+  @GeneratedValue(strategy = GenerationType.IDENTITY)  // az adatbázisnak kell automatikusan létrehoznia
+  @Id                        // primary key, unique
+  private Long id;
+
+  private String title;
+
+  @Column(length=1000)               // a varchar az sql-ben limitált hosszúságú, ezért itt most felüldefiniálja 1000 karakterre. Hogyha még ez is kevés lenne
+  @Column(columnDefinition = "TEXT") // varchar lehett CLOB lett a column típusa, így már 2,14 milliárd leütés hosszúságú is lehet.
+  private String content;
+
+  private Date posted;
+
+  @ManyToOne                  // egy bloggernek több sztorija is lehet
+  private Blogger blogger;    // ez is egy pojo, olyan, mint ez
+
+  private Story() {
+  }
+
+}
+
+--- cut ---
+
+@Entity(name="Bloggers")      // javax.persistence.Entity importálandó. Van másik is, de ez kell! a (name="") nem kötelező elem, itt átnevezi az adattáblát
+public class Blogger {
+
+  @GeneratedValue            // az adatbázisnak kell automatikusan létrehoznia
+  @Id                        // primary key, unique
+  private Long id;
+
+  private String name;
+
+  @Column(name="years")               // átnevezi az adattábla oszlopát
+  private int age;
+
+  @OneToMany(mappedby = "blogger")    // belőlem egy van, de több sztorim is lehet
+  private List<Story> stories;
+
+  private Blogger() {
+  }
+
+}
+
+
+MINDEN osztályváltozónak kell getterének setterének lennie, és nagyon fontos, hogy a nevük ugyanaz legyen, mint az osztályváltozó neve.
+
+
+Bussiness Logic
+===============
+
+"repository" packaget-t, és abba csinál egy INTERFACE-t, amely kiterjeszti a CrudRepository-t (org.springframework.repository)
+
+public interface StoryRepository extends CrudRepository<Story, Long> {   // a két típus: a pojo, amit tárolnia kell (Story) és az pojo ID-jének típusa (Long)
+
+  List<Story> findAll();   //SELECT * FROM STORY
+
+  // A JPA értelmezi az általunk írt függvény nevét, és képez belőle egy SQL lekérdezést:
+  Story findFirstByOrderByPostedDesc();  //SELECT * FROM STORY WHERE posted IN (SELECT max(posted) FROM story) LIMIT 1;
+
+}
+
+metódusok:
+  void save(Story)               // adatbázisba teszi az objektumot
+  Story findOne(Long)            // ID alapján megkeres egy objektumot
+  boolean exist(Long)            // true ha van ilyen ID
+  List<Story> findAll(List<ID>)  // listázza az összes objektumot
+  long count();                  // eredmények megszámlálása
+  void delete(Long)              // törli az adott ID-t
+
+
+A controllerben @Autowireddel példányosítja.
+
+
+blogpost kijelzése title alapján
+--------------------------------
+
+restcontorller:
+
+@RequestMapping("/title/{title}")
+public String searchForTitle(@PathVariable(value="title") String title) {
+  return storyService.getSpecificStory(title);
+}
+
+
+szervizben:
+
+public String getSpecificStory(String title) {
+  return storyRepo.findByTitle(title).getTitle();
+}
+
+
+Storyrepóban:
+
+@Query
+Story findByTitle(String title);
+
+
+
+Native Query
+------------
+
+Meg lehet adni valós SQL parancsokat is, ez esetben azonban a query-ben nem lehet ORDER BY és LIMIT, mert ezek fordítási hibát okoznak.
+
+
+@Query("SELECT new hu.greenfoxacademy.housecup.models.Winner(sum(h.pointsEarned), h.houseName) FROM HousePoints as h GROUP BY h.houseName")
+List<Winner> listHouseCupWinners();
+
+  Winner pojo classba rakja be hogy melyik ház mennyi pontot szerzett?
+
+
+@Query("SELECT new hu.greenfoxacademy.housecup.models.Valedictorian(count(h.studentName), h.studentName) FROM HousePoints as h GROUP BY h.studentName")
+  List<Valedictorian> getValedictorian();
+
+  Valedictorian pojo classba rakja, melyik student name hány bejegyzésben szerepel?
+
+
+De általában csak egyszerű lekéréseket használunk:
+
+    @Override
+    List<Book> findAll();
+
+    List<Book> findAllByBookId_TitleAndBookId_Language(String title, String language);
+
+    List<Book> findByBookId_TitleOrAuthor(String title, String author);

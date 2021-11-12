@@ -1,0 +1,151 @@
+Springboot
+==========
+
+Spring: egy java keretrendszer, web alkalmazások készítésére
+Boot: a bootstrap rövidítése, azt jelenti, hogy könnyen-gyorsan összehányható
+
+Az alkalmazások:
+- önállóan futtathatóak
+- ipari minőségűek
+- könnyen futtatható
+
+MVC (modell view controllet) megvalósítására is jó
+a programban reprezentált információ elszeparálódik a felhasználó által látható és befolyásolható információtól.
+
+részei:
+-controller - a bevitt parancsokat átadja az alábbiaknak
+-view - az információ megjelenítése (több is lehet)
+-model - felelős az adatszolgáltatásért
+
+
+Springboot project kezdése intelliJ-ben:
+
+1. New Project
+2. bal oldali listából kiválasztani a Spring initializert
+3. type: Gradle, Java version: 8
+4. következő képen kiválasztani:
+     Developer tools / Springboot devtools
+     Web / Spring web
+     Template Engines / Thymeleaf
+5. Finish
+
+a build-gradle file-ban találhatók:
+  - a project információi
+  - a project dependency-jei
+
+a src folderben:
+  - forrás file-ok
+
+
+Hello Világ program
+-------------------
+
+Csinál egy új classt:
+
+@RestController
+public class Controller {
+
+  @GetMapping("/")   // a localhost:8080 főkönyvtárja
+  public String homePage() {
+    return "Hello world";
+  }
+
+}
+
+Az applikáció elindíthato az intelliJ-ben a run gombbal, vagy az alábbi paranccsal:
+
+gradlew bootRun
+
+
+Gradle project az intelliJ-ben
+------------------------------
+
+1. New project
+2. Java
+3. név, group, artifactid
+4 finish
+
+main, test mappák és build.gradle file készül.
+
+A gradle ablakban láthatóak az elérhető gradle taskok és a már behívott dependencyk.
+A junit4 és a hamcrest alapból benne van.
+
+Ha másik plugin id-t írunk be, automatikusan hozzáadja azokat a dependency-ket, amelyek ahhoz szükségesek.
+
+gradle projektekhez mindig a gradle-n keresztül adunk hozzá külső könyvtárakat, a plugin settingsben hozzáadott könyvtárak a gradle újraindításakor eltűnnek.
+
+
+Gradle CLI
+----------
+
+./gradlew paranccsal meghívjuk, megnézi, hogy telepítve van-e, ha nincs, akkor telepíti. Emiatt az első indítás sokáig tarthat.
+
+gradlew -task paranccsal kilistázza az elérhető taskokat, majd...
+
+gradlew hello hívással elindítja a hello worldöt.
+
+
+Amikor a gradle elindul, betölt egy java virtul machine-t, ez soká tart. 
+Hogy ne kelljen kivárni, "daemon" módban is futtatható, amikor életben tartja a jvm-et:
+
+gradlew --daemon  
+
+megállítható:
+
+gradlew --stop
+
+
+Springboot elindítása
+---------------------
+
+SpringApplication.run(App.class, args)
+
+- elvégzi az alapbeállításokat 80-20%
+- kezeli az alkamazási környezetet (context): adatbáziskapcsolat, üzleti logika, kontrollerek
+- osztály elérési út vizsgálat (class path scan) a springbootban java classokat használunk, amelyeket annotációkkal látunk el:
+    @fservice - üzleti logika
+    @atcontroller - kontroller
+  ezeket nézi át a classpathscan, hogy tudja, hogy kell kezelnie a classokat
+- elindít egy Tomcat servert, ami lehetőséget teremt az alkalmazás letöltésére.
+
+
+Springboot projectek szervezése:
+--------------------------------
+
+A következő package-eket szokásos használni:
+
+- indító osztály ((com.project)
+- controllerek  (com.project.controller)
+- üzleti logika (com.project.service)
+- POJO tárhely adattároló classok (com.project.domain)
+- adatbázis kommunikáció (com.project.repository)
+
+
+
+Adatáramlás
+===========
+
+a java class tartalma:
+
+@Controller
+public class Webservice {
+
+  @RequestMapping("/web/greeting")
+  public String greeting(Model taska) {  // a Model objektum viszi át az adatokat
+    taska.addAttribute("name", "World")  // a ${name} változóba bekerül a "Word" tartalom
+    return "greeting";                   // ez a html file neve, kiterjesztés nélkül
+  }
+}
+
+a resources/templates/greeting.html tartalma:
+
+Hello ${name} !
+
+
+A resurces mappa
+----------------
+
+/static alkönyvtárba kerül minden olyan file, amit nem módosítunk, pl. képek, css-ek
+
+Ha a statikus file-ok közt létezik olyan, amelynek elérési útvonalára végpont is van írva a kontroller classban, akkor a kontroller tartalmát fogja visszaadni, nem a statikust!
+

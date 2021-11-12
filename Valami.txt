@@ -1,0 +1,27 @@
+﻿package com.gfa.exam.solution.valami.models;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity(name="valamik")  // az SQL table neve jön ide
+public class Valami {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
+
+  @Column(length=80)   // 80 karakteres string
+  private String szoveg;
+
+  // @Column(name="valami_name")  // automatikusan átkonvertálja ezzé a camelcase-t, ha az sql táblában ilyen néven szerepel
+  private String valamiName;
+
+  protected Valami() {}  // ez kibaszott fontos, különben nem működik
+
+  gettert, setter mindennek!!!
+
+
+}

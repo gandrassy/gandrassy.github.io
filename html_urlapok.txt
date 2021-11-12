@@ -1,0 +1,70 @@
+
+<form method="GET" id="regisztracio"> </form> az elküldött adatokat a címsorban küldi el
+
+<form method="POST" id="regisztracio"> </form> az elküldött adatokat nem fogjuk a címsorban látni
+
+<fieldset>  a formon belüli űrlapelemek csoportosítására szolgál. a fieldsetek egymásba is ágyazhatók
+
+  <legend>a form címe</legend>  ez a fildset keret tetején jelenik meg
+ 
+  <input type="text">
+  <input type="email">
+  <input type="tel"> telefonszám
+  <input type="password" required>  ezt kicsillagozza az inputot, és nem engedi elküldeni, ha üres
+  <input type="file"> csinál egy "file kiválasztása" buttont
+  <input type="submit" value="elküldés"> egy "elküldés" gombot csinál
+  <input type="reset" value="alaphelyzet"> egy "alaphelyzet" gombot csinál
+  <input type="checkbox"> pipálható bigyó
+ 
+  első     <input type="radio" name="harmasut">   a value="" mező adja vissza az értékét
+  második  <input type="radio" name="harmasut">   ha belabelezzük a feliratot, akkor arra kattintva
+  harmadik <input type="radio" name="harmasut">   is kiválasztható
+
+  <label for="user">neve</label> a labelekkel feliratozni tudjuk az inputokat. vakoknak fontos!
+  <input type="text" id="user">
+
+  <select name="szine">  legördülő listát hoz létre
+    <option>piros</option>
+    <option>kék</option>
+    <option>sárga</option>
+  </select>
+
+  <select name="tipusa">
+    <optgroup label="olasz">
+      <option>fiat</option>
+      <option>alfa romeo</option>
+      <option>lancia</option>
+    </optgroup>
+    <optgroup label="német">
+      <option>opel</option>
+      <option>mercedes</option>
+      <option>audi</option>
+    </optgroup>
+  </select>
+
+  <textarea cols="80" rows="25"></textarea>
+
+  <progress value="30" max="100"></progress> hőmérőt hoz létre 30%-os defaulttal
+
+  <button type="reset">Gomb</button>  lehet submit reset vagy button
+
+</fieldset>
+
+
+------------------- és most a CSS styling -------------------------
+
+form#regisztracio fieldset {   /* ez vonatkozik a fildset keretére */
+   margin: 0 0 30px 0;  /*hogy a fieldsetek ne érjenek egymáshoz */
+   border: 2px solid blue;
+}
+form#regisztracio fieldset legend {   /* ez vonatkozik a fielset címfeliratára */
+  padding: 5px 10px;
+  width: 100px;
+  background: green;  /* felirat háttere */
+  color: white;       /* betűszín */
+  border: 1px solid black;
+}
+
+
+@RequestMapping(value = "/", method = RequestMethod.POST)
+@RequestMapping(value = "/search", method = RequestMethod.GET)

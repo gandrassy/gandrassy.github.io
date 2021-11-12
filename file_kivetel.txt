@@ -1,0 +1,119 @@
+File IO
+=======
+
+import java.nio.file.Path;
+import java.nio.file.Files;
+
+Path myFile = Paths.get("lorem_ipsum.txt");   // utility class
+Path myReadOnlyFile = Paths.get("lorem_ipsum_read_only.txt");
+
+System.out.println (Files.isReadable(myFile) ); 
+System.out.println (Files.isWriteable(myFile) );
+
+try {
+  List<String> tartalom = Files.readAllLines(myFile);   // egy stringekből álló listát ad vissza, ahol minden sor egy string
+} catch (IOException e) {                       // általános hiba
+  e.printStackTrace();                          // kiírja a konzolra a hiba természetét
+}
+
+For (String line: tartalom) {
+  System.out.println (line);
+}
+
+tartalom.add("hozzáadjuk ezt a stringet");
+try {
+Files.write(myFile,tartalom);  //felülírja a file-t!
+} catch (AccesDeniedException e) {
+  throw new NoPermissionToFileException("Nincs jogod hozzá hogy írkálj a "+myFile+"-ba");         //csinál egy új classt hogy NoPermissionToFileException 
+} catch (IOException e) {
+  e.printStackTrace();
+}
+
+
+---NoPermissionToFileException .java---
+public class NoPermissionToFileException extends IOException {
+  public NoPermissionToWriteFileException(String message) {
+    super(message);
+  }
+}
+---vége---
+
+
+
+Files.write(myFile, tartalom, StandardOpenOption.APPEND);  //nem írja felül a file-t. Hozzáfűz.
+
+
+több catch is lehet:
+
+try {
+} catch (NoSuchFileException  e) {
+  System.out.println("Nincs ilyen fájl"); 
+} catch (IOException e) {
+  // valami hiba
+} finally {          //akár történik kivétel, akár nem, ami itt van, az le fog futni.
+}
+
+
+Kivételkezelés kiemelése metódusba:
+
+public static List<String> olvasokAzAllomanybol(Path neve) {   // ha ide írom throws IOException akkor az őt meghívó 
+  List<String> tartalom = new ArrayList<>();                   // programtörzsben lehet lekezelni a itteni kivételeket
+  try {
+    tartalom = Files.readAllLines(neve);
+  } catch (IOException e) {
+    e.printStackTrace();
+  }
+  return null;
+}
+
+
+kivételek
+---------
+
+egy fajta exceptiont lekezel, minden mást visszadob  main-ba:
+
+public static void olvas throws IOException {
+  try{
+    //kiírni a file-ba
+  } catch (NoSuchsFileException noSuchsFileException) {
+    //csinálni egy új file-t
+    //vagy továbbdobok egy másikat a mainnak: throw new UnsupportedOperationException;
+    //de saját magát is tovább lehet dobni a mainnak: throw new noSuchsFileException;
+  }
+}
+
+
+Saját kivételek
+
+kell csinálni egy új osztályt:
+  public class  MyException extends Exception {
+    public MyException(String message) {
+      super(message);
+    }
+    public MyException {}
+  }
+
+
+static void parose(int numbe) twhrows myException {
+  if (number % 2 !=0) {
+    throw new myException();
+  }
+  return;
+}
+
+szam = 11;
+while (true){
+  try {
+    parose(szam);
+    break;
+  } catcht myException {
+    e.printStacktrace();
+    szam++;
+  }
+}
+
+stack-trace
+-----------
+
+Egy adatszerkezet, amely 
+

@@ -1,0 +1,30 @@
+package com.gfa.exam.solution.touristinformation.controllers;
+
+import com.gfa.exam.solution.touristinformation.services.ValamiService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class ValamiRestController {
+
+  @Autowired
+  ValamiService valamiService;
+
+  @GetMapping("/budget")
+  public ResponseEntity threeCheapest() {
+    return valamiService.cheapestThree();
+  }
+
+  @GetMapping("/mindenvalami")
+  public Iterable<Valami> gimmeAll() {
+    return valamiService.listAllValamis();
+  }
+
+  @PostMapping("/posts")
+  public Valami newValamiAdder(@RequestBody Valami valami) {
+    return valamiService.post(valami);
+  }
+
+}

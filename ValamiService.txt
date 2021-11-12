@@ -1,0 +1,53 @@
+﻿package com.gfa.exam.solution.touristinformation.services;
+
+import com.gfa.exam.solution.touristinformation.models.Valami;
+import com.gfa.exam.solution.touristinformation.repositories.ValamiRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@Service
+public class ValamiService {
+
+  @Autowired
+  ValamiRepository valamiRepository;
+
+  public Iterable<Valami> listAllValamis() {
+    return valamiRepository.findAll();
+  }
+
+  public Valami getValami(Integer id) {
+    return valamiRepository.findById(id).orElse(null);
+  }
+
+  public void addValami( String valamiName, String szoveg) {
+    valamiRepository.save(new Valami(valamiName,szoveg) );
+  }
+
+  public void removeValami(Long id) {
+    valamiRepository.deleteById(id);
+  }
+
+  public void editValami(Integer id, String valamiName, String szoveg) {
+    Valami thisValami = valamiRepository.findById(id).orElse(null);
+    if (thisValami == null) { return; }  //ha nem találta meg, kilép
+    thisValami.setvalamiName(valamiName);
+    thisValami.setSzoveg(szoveg);
+    ValamiRepository.save(thisValami);
+  }
+
+  public ResponseEntity<Map<String,ArrayList<Attraction>>> cheapestThree() {
+    ArrayList<Valami> valamiList = new ArrayList<>(3);
+    valamiList.add(valamiRepository.findFirstByCategoryOrderByPriceAsc("restaurant"));
+    valamiList.add(valamiRepository.findFirstByCategoryOrderByPriceAsc("museum"));
+    valamiList.add(valamiRepository.findFirstByCategoryOrderByPriceAsc("park"));
+    HashMap <String, ArrayList<valami>> responseMap = new HashMap<>(1);
+    responseMap.put("ócsóak",attractionsList);
+    return new ResponseEntity<>(responseMap, HttpStatus.OK);
+    // további státusok: NO_CONTENT 
+  }
+
+
+
+
+}

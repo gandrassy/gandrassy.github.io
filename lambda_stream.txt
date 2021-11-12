@@ -1,0 +1,325 @@
+10. hét (jan 14-től)
+
+
+UML Alapok
+==========
+
+a training 360-ban átnézendő
+
+
+Optional
+========
+
+Egy olyan objektum, amely tartalmazhat egy másik objektumot.
+A nullpointer exceptionok kivédésére való. 
+
+Import java.utils.Optional;
+
+Allat maci = new Allat("Buci");
+
+Optional<Allat> allatOptional = Optional.of(maci);      // macit betesszük az optionalba. Muszáj, hogy amit beteszünk, az ne null értékű legyen, 
+                                                        // mert különben már ez a sor nullPointerExceptiont dob
+
+animalOptional = Optional.empty();                      // macit kiveszem az optionalba
+
+if (allatOptional.isPresent()) {                        // ha benne van a maci, kiírja, ha nincs benne semmi, nem fut le
+  System.out.println(animalOptional.get().toString());  // notSuchsElementExpressiont adna, ha az optional empty
+}
+
+
+Létezik olyan optional hogy .ofNullable() ami tartalmazhat null-t is. Ez esetben megadható egy default érték:
+
+allatOptional.orElse(maci)     // ha null értékű az optional, akkor macit ad vissza.
+
+
+példa:
+
+List<Allat> allatok = new Arraylist<>();
+allatok.add("Lama",1934,"him");
+allatok.add("Alpakka",1963,"him");
+allatok.add("Oszver",1977,"nosteny");
+allatok.add("Pinto",1982,"nosteny");
+
+
+public static Optional<Allat> elsoOregAllat(List<Animal> animals) {
+  LocalDateTime now = LocalDateTime.now();
+  int mostaniEv = now.getYear();
+  for (Animal animal : animals) {
+    int eletkora = mostaniEv - allat.getBirthYear();
+    if (eletkora > 40) return Optional.of(animal); 
+  }
+  return Optional.empty();
+}
+
+System.out.println( elsoOregAllat(allatok).orElse(null) );
+
+
+
+Inner classok
+=============
+
+Csak akkor használjuk, ha nagyon muszáj!
+
+
+public class Main{
+
+  public class Jarmu {
+    String rendszam;
+    public getRendszam;
+    public setRendszam;
+    stb.
+  }
+
+  public static void main(String[] args) {
+    Jarmu szallito = new Jarmu("CMJ-229");
+  }
+
+}
+
+
+Anonimus innerclasst csinálunk,ha implementalni kell egy interface-t vagy abstract osztályt, de nem akarunk csak ezért létrehozni egy osztályt.
+
+
+
+Lambda expression ->
+====================
+
+Használható a kód rövidítésére is, de nem csak erre jó: lehetőséget ad a funkcionális programozásra.
+
+---
+
+package lambda;
+
+public interface MorogniKepes {
+
+  public void morog();
+
+}
+
+---
+
+package lambda;
+
+public class Program {
+
+  public void megmorgat(MorogniKepes a) {    // egy olyan objektumot vár paraméterként, amelyik implementálja ezt az interface-t,
+    a.morog();                               // és amikor megkapta, akkor megmorgatja
+  }
+
+  public void main(Srting[] args) {
+    Kutya buksi = new Kutya();               //csinálni kell egy Dog classt, ami implementálja az interfészt
+    megmorgat(buksi); 
+
+    // ha nem akarok csak ezért egy kutya osztályt csinálni, akkor jön a lambda:
+
+    MorogniKepes morog = (int hossz) -> {        //betesszük a kódot egy változóba, aminek a típusa az interface neve
+      System.out.print("gr");
+      for (int i=0; i<hossz; i++) System.out.print("r");
+      System.out.println("");
+    };                                           // return érték is megadható!
+    megmorgat(morog);                            //és megmorgatható a nélkül, hogy csináltunk volna egy kutyát hozzá!
+
+  }
+
+}
+
+---
+
+
+Guba Krisztián féle lambda:
+
+public class TryLambda {
+
+  public static void main(String[] args) {
+
+    Udvozlo udvozlo = new Udvozlo() {             //anonimusz class
+      public String udv() { return "hello"; }
+    }
+
+    // ez felírható így is:
+
+    Udvözlo udvozlo = () -> "hello";   // a lambda mindig _csak_egy_metódus_
+
+    Collable<String> proba = () -> "hello";
+
+    Function<String,String> udvozlo = (String name) -> "BUÉK" + name + "!";   //a <> az egyik String a bemeneti paraméter, a másik String a visszatérési érték
+    System.out.println( udvozlo.apply("Krisz") );
+
+    BiFunction<String, Integer, Long> fuggveny = (String name, Integer number) -> name.length()+number+0L;         // string és int bemenet, long kimenet
+
+    Counter szamlalo = (String name, Integer number) -> name.length()+number+0L;
+
+
+  }
+
+}
+
+
+
+Java Stream API
+===============
+
+Kollekciók (listák, tömbök stb) menedzselésére való.
+
+static class Ruha {
+  String szin;
+  int meret;
+}
+
+List<Ruha> ruhak new Arraylist<>();
+ruhak.add("piros",40);
+ruhak.add("zold",42);
+ruhak.add("piros",40);
+ruhak.add("fehér",42);
+ruhak.add("fehér",40);
+
+ruhak.stream() .forEach(                   // minden elemére meghívunk...
+  ruha -> System.out.println(ruha)         // egy lambda konverziót, ami kiír mindent
+);
+
+ruhak.stream()
+     .filter(ruha -> ruha.getMeret()==40)   // ez egy új stream, amelyben csak a 40-es méretű ruhák lesznek benne
+     .forEach(ruha -> System.out.println(ruha) ); 
+
+így is meghívható:
+     .forEach(System.out::println);
+
+
+
+a predikátum átadható paraméterként is, így a kódrészlet kiemelhető egy függvénybe:
+
+public static void szures(List<Ruha>, Predicate<Ruha> p) {
+ ruhak.stream()
+   .filter(p)
+   .forEach(System.out::println);
+ }
+
+és akkor a mainba már csak annyit kell írni:
+
+szures(ruhak, ruha -> ruha.getMeret() == 40);
+szures(ruhak, ruha -> ruha.getSzin().equals("fehér") );
+
+
+A predikátumok el is menthetőek:
+
+Predicate<Ruha> negyvenes = ruha -> ruha.getMeret() == 40;
+
+
+összes fehér ruha méretének növelése eggyel:
+
+ruhak.stream()
+  .filter(ruha -> ruha.getSzin.equals("fehér"))
+  .forEach( ruha -> ruha.setMeret(ruha.getMeret++)); 
+
+A filter memóriacím szerint ad át, így tehát a filterezett streamon készített változások megjelennek az ősben is.
+
+
+Ha ki akarjuk írni, milyen színű 40-es ruháink vannak, akkor:
+
+ruhak.stream()
+  .filter(negyvenes)
+  .map( ruha -> ruha.getSzin() )    // írható úgy is, hogy .map(Ruha::getSzin), csinál egy új streamot ami a színeket tartalmazza
+  .forEach(System.out::println);    // kiírja a .map tartalmát
+
+
+másik példa:
+
+Set<String> negyvenkettesSzinek = new HashSet<>();
+
+for (var ruha: ruhak) {
+  if (ruha.getMeret()==42) {
+    negyvenkettesSzinek.add(ruha.getszin());
+  }
+}
+System.out.println(negybenkettesSzinek);
+
+A fenti példában bizonyos színek többször is bekerülhetnek a kollekcióba.
+
+Set<String> negyvenkettesSzinekStream = ruhak.stream()
+  .filter(ruha -> ruha.getMeret()==42)
+  .map(Ruha::getSzin)
+  .collect(Collectors.toSet());
+
+System.out.println(negybenkettesSzinekStream);
+
+collect(Collectors.toSet()) egy halmazba rak be. A halmazban minden csak egyszer szerepelhet.
+collect(Collectors.toList()) egy listába tesz be.
+
+az átlagosnál kisebb ruhák:
+
+long darab = ruhak.stream().count();  // megmondja a streamnek hány eleme van
+
+int osszeg = ruhak.stream()
+  .map(Ruha::getMeret())                      // az összes ruha mérete egy streambe kerül
+  .reduce(0, (akku, elem) -> akku+elem);      // az accumullator kezdetben nulla, ehhez hozzáadja az első elemet,
+                                              // aztán ehhez az összeghez hozzáadja a következő elemet stb. "gurul" végig
+
+a kétvátozós így is felírható: .reduce(0,Integer::sum);
+
+maga a kifejezés pedig így is:
+
+int osszeg = ruhak.stream()
+  .mapToInt(Ruha::getMeret())   // a ruhak.streamet alakítsd át int-é a getMeret() fv-vel, 
+  .sum();                       // int streamen már van összeadás fv.
+
+
+double atlag = (double)osszeg / darab;
+
+List<Ruha> kisruhak = ruhak.stream()
+  .filter( ruha -> ruha.getMeret() < atlag)
+  .collect(Collectors.toList());
+
+
+Az első piros ruha kiírása:
+
+Optional<Ruha> elsoPiros = ruhak.stream()
+  .filter(ruha -> ruha.getSzin().equals("piros"))
+  .findFirst();
+
+if (elsoPiros.isEmpty()) {
+  sout("nincs piros");
+} else {
+  sout("az első piros:" + elsoPiros.get() );
+}
+
+if helyett így is megvalósítható:
+
+String eredmény = elsoPiros.map( ruha -> "Az első piros:" + ruha)     // ha visszajött egy ruha, akkor abból kiveszi a színt
+  .orElse("nincs piros ruha");                                        //ez alakítja az Optional<String> típust Stringgé.
+ 
+
+--- krisztián féle agyolvasztó ---
+
+köztes operátor
+  .filter
+  .map    // átalakít egy másik adatszerkezetté
+
+terminális operátor
+
+
+Vector - ugyanolyan mint egy ArrayList, csak a vector átadható egy több szálon futó metódusnak, és threadsafe, egyszerre többfelől is abajgatható
+
+joiner:
+
+String nevek = allatok.stream()
+  .map(animal::getName)             // kimappelem csak a neveket
+  .collect(Collectors.joining());   // összefűzi a három nevet
+
+vagy
+
+  .collect(Collectors.joining(" "));           // összefűzi szóközzel
+  .collect(Collectors.joining("," , "(" , ")"));   // limiter, prefix, suffix
+
+továbbiak a collectorokról:
+https://www.baeldung.com/java-8-collectors
+
+
+paralel stream
+--------------
+
+akkor használjuk, ha többezer adatot kell kezelni.
+
+String nevek = allatok.stream()
+  .parallel()                       // szétosztja a streamet multiprocessz környezetbe
+  .map(animal::getName)             // kimappelem csak a neveket
+  .collect(Collectors.joining());   // összefűzi a három nevet

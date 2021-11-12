@@ -1,0 +1,201 @@
+1. változók
+===========
+
+primitív típusúak
+-----------------
+  egész számok
+    byte    8 bit  -128...127
+    short  16 bit  -32768...32767
+    int    32 bit  -2,14mrd...2.14mrd  - általában ez használatos
+    long   64 bit
+
+  lebegőbontos (tört) számok
+    float    32bit  - ritkán használatos
+    double   64bit
+
+  boolean  logikai érték
+
+  enum a booleanhoz hasonló, de kettőnél több értéket is felvehet.
+
+  char  16bit  egy UNICODE karakter
+
+  Ezeket érték szerint adja át a java.
+
+referencia típusúak
+-------------------
+
+  Integer
+  String
+  Character
+  Object
+
+  Ezeknek értéke nincs, csupán rámutatnak egy bizonyos memóriacímre. Ezért ha értéküket másik 
+  változónak adjuk át, az nem foglal le új tárterületet a memóriában, ugyanazt a területet kezeli.
+
+deklaráció
+----------
+
+  int c;       - legyen egy változó
+  int d = 10;  - legyen egy változó, aminek az értéke 10
+
+  float f= 12,5F; - a fload végére kell egy f, különben double-nak értelmezi.
+
+  enum szin { RED("piros",900),
+              GREEN("zöld",090),
+              BLUE("kék",009)
+              private szin(String neve, Integer ralcode) {};
+              private String name();
+              private enum valueOf(String x);  // throws illegal argument exception
+            };
+
+  char h = 'A'; 
+
+értékadás már deklarált változónak:
+-----------------------------------
+  c = 5; 
+
+
+2. operátorok
+=============
+
+numerikus
+---------
+  d + c   összeadás
+  d - c   kivonás
+  d * c   szorzás
+  d / c   osztás
+  d % c   az osztás maradékát adja meg (két egész szám osztásának minfig 0 1 2 vagy 3 a maradéka)
+
+logikai
+-------
+  b1 && b2  AND
+  b1 || b2  OR
+
+
+értékadás operátorok
+--------------------
+
+  i = j;     a jobb oldali érték belemásolódik a bal oldaliba. 
+  i += j;    i értékét növeli j értékével
+  i *= j;    i értékét megszorozza j értékével
+
+
+Operátorpreferencia:
+====================
+
+a legutoljára végrehajtott utasítás az = += -= 
+ utána a logikai operátorok: ?:  ||  && sorrendben
+  egyenlőség, egyenlőtlenség == !=
+   utána a relációs operátorok < > <= >= (az egyenlőségjelnek mindig jobb oldalon kell lennie!)
+    utána a string összefűzés + jellel
+     szorzás-osztás * / %
+      összeadás-kivonás + -  egyváltozós előnövelés
+       egyváltozós utónövelés ++ --
+        zárójel ()
+         tömbelem-hozzáférés [] a legelőször végrehajtott utasítás
+
+
+utónövelés
+----------
+  egyváltozós előnövelés  ++i;
+  egyváltozós utónövelés  i++;
+
+  ha kifejezésként használja
+  println(i++); - először helyettesíti be a kifejezésbe, és csak utána növeli meg eggyel!, vagyis i-t ír ki, de a további kódban már i+1 az érték.
+  println(++i); - először megnöveli, és csak utána helyettesíti be a kifejezésbe, vagyis i+1-et ír ki
+
+  pl.:
+    int i=100;
+    j = i++ + ++i;  az gyakorlatilag j = 100 + 102; -nek felel meg!
+
+
+feltételes hármas operátor:
+---------------------------
+   system.out.println( i % 2 == 0 ? "páros" : "páratlan" );  ezek egymásba ágyazhatók, de 
+
+
+összehasonlító operátorok
+-------------------------
+
+   == teljes megegyezés
+   != eltérés
+   <= kisebb vagy egyenlő
+   <  kisebb
+
+
+if feltételes elágazás (control flow statement)
+======================
+
+  if ( [boolean kifejezés] ) {   //ha csak egy utasítás követi, a kapcsos zárójel nem kötelező 
+  } else {
+  }
+
+  if ( [boolean kifejezés] ) {   //egymásba fűzött, három ágú if vezérlőszerkezet
+  } else if () {
+  } else {
+  }
+
+
+switch feltételes elágazás
+==========================
+
+  int dayOfWeek = 3;
+
+  switch (dayOfWeek) {
+    case 1: System.out.println("Hétfő");
+    case 2: System.out.println("Kedd");
+    case 3: System.out.println("Szerda");
+    case 4: System.out.println("Csütörtök");
+    case 5: System.out.println("Péntek");
+    case 6: System.out.println("Szombat");
+    case 7: System.out.println("Vasárnap");
+  };
+
+  Falls through logic: a case 3 csak egy belépési pont, és onnantól fogva mindent végrehajt, a csütörtök, péntek, szombat, vasárnap is kiíratik.
+
+  ezt a break utasítással lehet megakadályozni:
+
+  switch (dayOfWeek) {
+    case 1: System.out.println("Hétfő"); Break;
+    case 2: System.out.println("Kedd"); Break;
+    case 3: System.out.println("Szerda"); Break;
+    case 4: System.out.println("Csütörtök"); Break;
+    case 5: System.out.println("Péntek"); Break;
+    case 6: System.out.println("Szombat"); Break;
+    case 7: System.out.println("Vasárnap"); Break;
+  };
+
+  Ez a vezérlőszerkezet a C-ben is így működik.
+
+  switch (dayOfWeek) {
+    case 1: 
+    case 2: 
+    case 3: 
+    case 4: 
+    case 5: System.out.println("Hétköznap"); Break;
+    case 6: 
+    case 7: System.out.println("Hétvége"); Break;
+  };
+
+  szerepelhet benne egy *default* ág is, amelyet akkor hajt végre, hogyha egyik esetre sem illik.
+
+
+  értékadásra használva:   (csak a java v14-től használható! korábbi változatoknál "enable preview features" bekapcsolandó!)
+
+  String nameOfDay = switch (dayOfWeek) {     ennél a fajtánál a default kötelező!
+    case 1 -> "Hétfő";
+    case 2 -> "Kedd";
+    case 3 -> "Szerda";
+    case 4 -> "Csütörtök";
+    case 5 -> "Péntek";
+    case 6 -> "Szombat";
+    case 7 -> "Vasárnap";
+    default -> { dayOfWeek = 0;
+                 yield "nemtom";
+               }
+  };
+  System.out.println(namOfDay);
+
+  A -> token használható a fentebbi esetekben is, és akkor nincs szükség break-re, mert kizáró eseteket írnak le.
+  A : tokenre viszont van fallsthrough logic.
+

@@ -1,0 +1,5 @@
+import java.util.Scanner;
+
+Scanner beolvaso = new Scanner(System.in);  // fuggveny definició<br>
+String eletkor = beolvaso.nextLine();       // ennél a sornál bemenetet vár.<br>
+kor = parseInt(eletkor);                    // átalakítja a beolvasott stringet int-é

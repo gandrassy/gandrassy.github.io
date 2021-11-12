@@ -1,0 +1,223 @@
+
+Akkor mondjuk, hogy egyik osztály függ egy másik osztálytól, hogyha abban bárhol szerepel a másik osztály neve. Vagyis ha a példányosítás az osztályon kívül történik.
+
+SOLID elvek:
+  - minden function egy dologért felelős
+  - egy osztály legyen nyílt a kiterjesztésre, de zárt a módosításra
+  - Liskov-elv: minden osztály legyen helyettesíthető a leszármazott osztályával
+ 
+
+Garden app felépítése:
+
+models package
+--------------
+  Adatleíró classok, Flower, Tree stb.
+  Itt van a Garden is, amely private List<>-ben tárolja a növényeket.
+
+controllers package
+-------------------
+  user input esetén merre menjen a program. interface showGardern(), addPlant()
+  ezeket az interface-eket implementálja a GardenWebController és a GardenConsoleController class.
+  Ezek egy Gardenservice class-t használnak oly módon, hogy azt példányosítják maguknak privátban,
+  és ennek a metódusait hívogatják.
+
+services package
+----------------
+  A Gardenservice class is csak egy interface, amelyet különféleképpen implementál:
+  van egy olyan implementáció, ami megöntözi a frissen ültetett növényt, és van olyan, ami nem.
+  Közös pontjuk, hogy mindkettő service példánosítva használja a GardenRepository-t, amely egy
+  ID szerint tárolja a kerteket.
+
+repositories package
+--------------------
+  Gardenrepository egy interface, amit lehet SQL-esen is implementálni, vagy helyi file-ba is
+  implementálni.
+
+main() {
+  Gardenrepository gardnrepository = new GardenFileRepository(); //példányosítja, hogy helyi file-ba dolgozik majd
+  Gardenservice gardenservice = new Notwateringservice(gardenrepository); // példányosítja, az ültetés után nem locsoló implementációval, és bele injektálja a fentebb létrehozott repo példányt
+  Gardencontroller gardencontroller = new GardenWebController(gardenservice); //weben keresztül akarja elérni
+}
+
+
+Gyári programtervezési minta (Factory design pattern)
+----------------------------
+
+Azokat az osztályokat, amelyek objektumokat hoznak létre, gyáraknak nevezzük, de a Springboot mint "bean"-ra hivatkozik rájuk.
+
+Nem kell a mainben példányosítani a dolgokat. Csinál egy konfigutációs osztályt:
+
+import repositories.GardenFileRepository;
+import services.Notwateringservice;
+import services.GardenService;
+
+@Configuration  //spring nézd ezt át induláskor
+public class GardenConfiguration {
+
+  public GardenRepository createGardenRepository() {
+    return new GardenFileRepository;
+  }
+
+  @Bean  //ha bármikor egy gardenservice példányra van szükség, akkor ezt használd itt, ezt a nemöntözőst
+  public GardenService createGardenService() {
+    return new Notwateringservice(createGardenRepository)
+  }
+
+
+  public GardenController createGardenController() {
+    return new GardenWebController(createGardenService());
+  }
+
+}
+
+
+Ha nem Springbootos az appunk, akkor a mainban kell példányosítani:
+
+public static void main(String[] args) {
+  GardenConfiguration config = new GardenConfiguration;
+  GardenController gardencontroller = config.createGardenController();  // láncreakció szerűen végighívogatja a Configuration class metódusait
+}
+
+De ha springes, akkor ez nem kell, intéződik automatikusan az annotációk alapján.
+
+
+Spring boot
+-----------
+
+konfig file: build.gradle
+
+annotációk:
+
+@Controller
+@getMapping("/garden/{gardenId}')
+@PostMapping("/garden")
+
+Azzal, hogy spring @Controller lett belőle, a main-ba írt példányosítás már nem működik.
+
+1. megoldás: a Configutarion class-t el kel látni a következő annotációval: @Configuration
+A factory-kat meg egy-egy @Bean annotációval. Amikor indul az alkalmazás, az összes ilyen annotációt átnézi.
+
+Átírhatja a konfig file-ot így:
+
+import repositories.GardenFileRepository;
+import services.Notwateringservice;
+import services.GardenService;
+
+@Configuration  //spring nézd ezt át induláskor
+public class GardenConfiguration {
+
+  @Bean
+  public GardenRepository createGardenRepository() {
+    return new GardenFileRepository;
+  }
+
+  @Bean  //ha bármikor egy gardenservice példányra van szükség, akkor ezt használd itt, ezt a nemöntözőst
+  public GardenService createGardenService(GardenRepository gardenrepository) {  //mivel a grepo is bean, a spring már elkészítette
+    return new Notwateringservice(gardenrepository);
+  }
+
+// ezt kitörölte
+//  public GardenController createGardenController() {
+//    return new GardenWebController(createGardenService());
+//  }
+
+}
+
+
+configurációs file akármennyi létrehozható.
+
+
+2. megoldás konfigurációs file-ok nélkül
+----------------------------------------
+
+beír egy annotációt:
+
+@Service
+public class NotWateringGardenService implements Gardenservice; ... stb.
+
+@Repository
+public class GardenFileRepository implements GardenRepository; ... stb.
+
+
+és akkor tudja, melyiket használja. A Spring IOC (Inverse of Control) konténer példányosítja az objektumokat.
+
+
+Minden annotációk szülője a @Component. Ha egy bármilyen classra rákerül, akkor az alkalmazás indításakor a spring automatikusan
+létrehoz egy példányt, elmenti a memóriába, és ha bármikor szükség lesz egy ilyen példányra, akkor azt a példányt használd, amit
+létrehoztál.
+Az elkészített példányt csak konstruktőrben, setterben lehet használni. 
+
+A konstruktőr helyettesíthető változódeklarációval is:
+
+ @Autowired 
+ private Gardenservice gardenservice;
+
+De a javasolt megoldás:
+
+ private Gardenservice gardenservice;
+
+ public GardenConsoleController(Gardenservice gardenservice) { this.gardenservice = gardenservice; }
+
+
+Singletone: ha egy adott alkalmazás futtatása során csak egyetlenegy példány létezik az adott típusból.
+Jelen esetben a gardenservice egy singletone.
+
+Ha több példányra van belőle szükség, akkor muszáj konfigurációs file-t használni.
+
+
+import repositories.GardenFileRepository;
+import services.Notwateringservice;
+import services.GardenService;
+
+@Configuration
+public class GardenConfiguration {
+
+  @Bean
+  public GardenRepository createGardenRepository() {
+    return new GardenFileRepository;
+  }
+
+  @Bean  
+  @Scope(value = "singletone") //ez az alapértelmezés
+  @Scope(value = "prototype")  //mindig egy új példányt hoz létre
+  public GardenService createGardenService(GardenRepository gardenrepository) {  
+    return new Notwateringservice(gardenrepository);
+  }
+}
+
+
+
+összefoglalva:
+
+a controller class a konstruktorában kapja meg a service példányt, amit letárol egy helyi, private Gardenservice-ban, 
+és utána azon keresztül hívogatja a metódusokat (locsolás, stb)
+
+
+@Lazy annotációval minden kiegészíthető, és akkor csak akkor példányosít, hogyha a példányt valaki használni is akarja.
+A használaton kívüli implementációkat érdemes vele megjelölni.
+
+
+
+Ha nem Springgel dolgozunk, akkor a van két dependency injection: 
+ - Guice (reflection-t használ, ezért lassú), 
+ - Dagger (nem reflectionos) androidhoz találták ki. Fordításkor végzi az injectiont, emiatt a fordítási idő megnő, de a futásidő gyorsabb
+
+
+
+--- autorun a Springben ---
+
+@SpringBootApplication
+public class MyApplication implements CommandLineRunner {
+
+  public void run(String... args) {
+    // az ide kerülő parancsok rendszerindításkor végrehajtatnak
+  }
+
+  public static void main(String[] args) {
+    SpringApplication.run(MyApplication.class, args);
+  }
+
+}
+
+
+

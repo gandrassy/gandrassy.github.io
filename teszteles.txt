@@ -1,0 +1,136 @@
+Unit test:
+---------
+Egy funkcióra (mondjuk egy függvényre) vonatkozik.
+Junit vagy TestNG
+
+Integration test
+----------------
+A szoftver különböző részeinek interakcióját teszteli.
+
+Funkcionális test
+-----------------
+komplex program rendeltetésszerű használata, aka beta test
+Selenium
+
+Stress test
+-----------
+terheléses teszt: ki tud-e szolgálni elegendő usert
+
+Penetration test
+----------------
+etikus hackerek megpróbálják megtörni
+
+
+Junit
+=====
+
+1. A root-ba csinált egy új directoryt test névvel aztán a file/project/structure-ban beállítja, hogy ez a directory test típusú.
+2. jobb gombbal rákattint a class-ra, generate test, Junit4, bechekkolja a tesztelendő metódusokat, és OK
+
+A test unitok sima függvények. beleírjuk, hogy:
+  assertEquals(várt eredmény, tesztelendő fv)  pl. 
+
+    @Test
+    public void grow() {
+      assertEquals( Integer.valueOf(1), appleTree.getheight() );
+      appleTree.grow();
+      assertEquals( Integer.valueOf(2), appleTree.getheight() );
+    }
+
+
+
+További ellenőrzések:
+
+fail(message)
+A hívó teszt sikertelen futását eredményezi
+
+assertTrue([message,] boolean condition) or assertFalse
+Ellenörzi, hogy a megadott feltétel igaz (hamis) – e.
+
+assertEquals([message,] expected, actual)
+Ellenőrzi, hogy két objektum egyenlő-e.
+
+assertNull([message,] obj) or NotNull
+Egy Objektum null (nem null).
+
+assertSame([message,] expected, actual) or assertNotSame
+Ellenőrzi, hogy két változó ugyanarra az objektumra mutat (==). 
+
+
+Megadható egy 
+
+   @Before
+   public void before() {
+   }
+
+is. Ez minden egyes tesz előtt lefut, ide ki lehet írni a közös kódot, pl. appleTree = new Appletree();
+
+Párja az
+
+  @After
+   public void after() {
+   }
+
+Ide kerülhet pl. a sout( appletree.toString() );
+
+van ilyen is:
+
+  @BeforeClass
+   public void beforeClass() {
+   }
+
+Ez nem minden egyes teszt előtt fut le, hanem az egész tesztsorozat előtt egyszer.
+
+párja az
+
+  @AfterClass
+   public void afterClass() {
+   }
+
+általában valami
+
+Junit5-ben az annotációk nevét megváltoztatták: beforeAll/afterAll, beforeEach/afterEach
+
+
+
+További annotációk:
+
+@Test public void method()
+Teszt metódus jelölése
+
+@Test (expected = Exception.class) 
+A teszt sikertelen a megadott típusú kivétel hiányában
+
+@Test(timeout=100) 
+A teszt sikertelen, ha a metódus mem fejeződik be adott idő alatt
+
+@Ignore or @Ignore("Why disabled") 
+Adott teszt metódus kihagyása
+
+
+Exception testing
+=================
+
+Csak egyetlen egy féle exceptionra tudunk tesztelni. Pl...
+
+
+public class MyClass {
+  public int multiply(int x, int y) {
+  if (x > 999) { throw new IllegalArgumentException("x>999"); }
+  return x / y;
+  }
+} 
+
+public class MyClassTest {
+  @Test(expected = IllegalArgumentException.class)
+  public void testExceptionIsThrown() {
+    MyClass tester = new MyClass();
+    tester.multiply(1000, 5);
+  }
+
+  @Test
+  public void testMultiply() {
+    MyClass tester = new MyClass();
+    assertEquals(50, tester.multiply(10, 5));
+  }
+} 

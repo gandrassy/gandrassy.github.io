@@ -1,0 +1,330 @@
+Class és Instance
+=================
+
+Class (osztály)
+---------------
+Általános leírása az objektumoknak. Pl. "ember" "cipő" "madár", ezek klasszok.
+
+
+Instance (példány)
+------------------
+Konkrét példányok, amelyek valamelyik class-ba soroltatnak.
+
+
+public class Student {
+
+  //tulajdonságok - fields
+  String name;
+  int age;
+  boolean isHungry;
+  String mood;
+  static int aSorbanAHanyadik;
+  static String mentor = "Adam";
+
+  //viselkedés - methods
+  public void introduce() {
+    System.out.println("Az én nevem" + name + ", " + age + " éves vagyok");
+    System.out.println(isHungry ? "Éhes vagyok" : "Jóllakott vagyok");
+  }
+
+  public void eat() {
+    isHungry = false;
+  }
+
+}
+
+
+Egy példány készítése a main-ban:
+
+  Student tamas = new Student();
+
+  tamas.name = "Tamás";
+  tamas.age = 22;
+  tamas.isHungry = true;
+  tamas.mood = "fáradt"
+
+  és máris van egy tamásunk. Kérjük meg, hogy mutatkozzon be:
+
+  tamas.introduce();
+
+
+Constructor
+===========
+
+Az instance kezdőértékeit állítja be. Csak a fieldek beállítását végzi, esetleg validálhatja, de mást nem csinálhat.
+
+a class-ba kerül:
+
+public Student(); {   //paraméterek nélküli konstruktőrt létre kell hozni, ha csinálunk paraméteres konstruktőrt
+aSorbanAHanyadik++; }
+
+public Student(String name, int age) {
+  this.name = name.substring(0,1Ö.toUpperCase() + name.substring(1).trim(); //nagybetű, space-ek levágása
+  this.age = age;
+  aSorbanAHanyadik++;
+}
+
+public Student(String name, int age, boolean isHungry, String mood) {
+  this(name, age);               // a több paraméteres konstruktőr meghívja a kevesebb paraméterest
+  this.isHungry = isHungry;      // a this. azonosítja, melyik a példányhoz tartozó változó
+  this.mood = mood;
+}
+
+// a konstruktőr akkor fut le, amikor a new kulcsszót kiadjuk
+  
+
+példány (instance) létrehozása konstruktőrrel a main-ban:
+
+  Student agnes = new Student("Ágnes", 27, true, "vidám");
+
+
+Static kulcsszó
+===============
+
+A static kulcsszóval deklarált aSorbanAHanyadik egy olyan változó, amely nem a példányhoz tartozik, hanem az osztályhoz. A példányoktól teljesen független.  
+
+adott esetben lekérdezhető úgy is, hogy Student.aSorbanAHanyadik
+
+
+Nem csak egy field, hanem egy metódus is lehet statikus. 
+
+public static String getMentor(); {   //ebből csak statikus információk elérhetőek
+return mentor;
+}
+
+meghívása: Student.getMentor;
+
+A statikus fieldek példányokról is elérhetőek, pl. ferenc.getMentor; de ezt nem csináljuk,
+mert azt a látszatot kelti a kód olvasásakor, mintha a dinamikus példánnyal volna összefüggésben, holott nem.
+
+
+Final kulcsszó
+==============
+
+Megváltoztathatatlanná teszi a dolgokat.
+Konstanssá lesznek a változók, felülírhatatlanná a metódusok. 
+Konstruktőrre nem értelmezhető, mivel a konstruktőr nem öröklődik.
+A final classnak nem lehetnek leszármazott osztályai.
+
+pl. final float pi = 3.14f;
+
+
+Egységbe zárás
+==============
+
+Az osztályok belsejében lévő példányokat a felhasználók elől elrejtjük, azok csak a példánymetódusok
+(getterek, setterek) érhetőek el vagy módosíthatók. Ehhez elérési szint módosítókat használunk:
+
+     +-----------+---------------+--------------+----------------+--------------+
+     | módosító  | ez az osztály | leszármazott | azonos package | mindenki más |
+     +-----------+---------------+--------------+----------------+--------------+
+     | public    |     eléri     |     eléri    |      eléri     |     eléri    |
+     | private   |     eléri     |  nem éri el  |   nem éri el   |  nem éri el  |
+     | protected |     eléri     |     eléri    |      eléri     |  nem éri el  |
+     | [nincsen] |     eléri     |  nem éri el  |      eléri     |  nem éri el  |
+     +-----------+---------------+--------------+----------------+--------------+
+
+
+Öröklődés
+=========
+
+
+1. class: Allatok
+          protected String name;   // ezzel a láthatósággal a gyermekei is elérik a változót
+          public String getname() {}
+          public void setname() {}
+          public void hang() { system.out.println("állati nesz"); } 
+          stb.
+
+2. class: Macska extends Allatok
+          public void miau() { system.out.println("miau"); }
+
+ez utána a macska típusú objektumok tudnak miau()-t is és getname() meg setname()-t is!
+
+A Macska class konstruktőre meghívja az Allatok konstruktőrét eképpen: super(name);
+
+Egy classnak csak egy szülője lehet, de láncba fűzhetőek. Pl. lehet:
+ class Allatok -> class Emlosok -> class Macskafelek -> class Hazimacska
+
+A szülőben definiált metódusok a gyermekben felüldefiniálhatók:
+
+  @Override
+  public void hang() { macska.miau(); }
+
+vagy elrejthetők:
+
+  public void hang() { macska.miau(); }
+ 
+A különbség az, hogyha a gyermeket átkasztolom a szülő objektumtípusba, akkor 
+ - elrejtés esetén a szülő metódusa hívatik meg
+ - felüldefiniálás esetén viszont a gyermeké
+
+Tehát az Allatokként kezelt macska elrejtés esetén csak "állati neszt" tud hallatni, felülírás esetén
+viszont miákol.
+
+
+Ha a szülőben a metódus nem Public, hanem Protected, akkor kívülről nem elérhető,
+olyan, mintha Private lenne, de a gyereke ugyanúgy tudja használni, mintha Public lenne.
+Az egész lánc végigörökli az ős cuccát.
+Nota bene, a Protectedet az azonos package-ba tartozó osztályok is látni tudják,
+még ha nem is leszármazottai az ősosztálynak.
+
+
+"Átkasztolás"
+-------------
+
+Ha van egy allatkert tömböm, amiben különböző állatok vannak:
+
+ArrayList<Allatok> allatkert = new ArrayList<>();
+allatkert.add(macskapeldany);
+allatkert.add(kutyapeldany);
+...stb.
+
+// és ebből meg akarom doromboltatni a macskát
+
+Allatok ujallat = allatkert.get(1);
+
+Macska ujmacska = (Macska) ujallat;    // ez rámutat, hogy ujallat macskaként kezelendő
+
+// és így, de csak így már elérem a macskaspecifikus metódust:
+
+ujmacska.dorombol();
+
+De ez a megoldás csak akkor működik, hogyha egészen biztosak vagyunk benne, hogy az allatkert<>[1] az egy macska.
+Ha ott egy kutya van, akkor futás közbeni hibával (classChastException) ledöglik! 
+
+Ezt úgy lehet megelőzni, hogy átkasztolás előtt megvizsgáljuk macska-e?
+
+if (ujallat instanceof Macska) {
+  Macska ujmacska = (Macska) ujallat;
+  ujmacska.dorombol();                  //macska specifikus metódus
+} else {
+  ujallat.hang();                       //általános Allatok class metódus
+}
+
+
+Van egy másik lehetőség az instanceof helyett:
+
+Class<? extends Allatok> allatOsztaly = ujallat.getClass();
+
+allatOsztaly.getSimpleName();  //visszaadja, hogy "Macska", amire már lehet egy if-et írni.
+
+de ezt sokkal nehezebb implementálni. pl. ha több azonos nevű osztály is van, akkor még a package-ot is vissza kell kérni stb. ezért Krisztián nem javasolja.
+
+
+
+
+Absztakt osztályok
+==================
+
+úgy definiáljuk, hogy
+  public abstract class Allatok { 
+  }
+
+Az absztrakt osztályok nem példányosíthatóak, de közös kódrészleteket biztosítanak a gyerekeiknek.
+
+A szülő konstruktőrét a super kulcsszóval hívja meg:
+
+  public Ship(int ID, String name) {
+    super(ID, name);
+  }
+
+Ha egy szülői függvényt felülír, abból az eredeti szintén úgy hívható, hogy super.hang();
+
+
+Interface-k
+===========
+
+Az interface-ban nem lehet kódot írni, ott csak deklarálja a metódusokat.
+
+  public interface Haziallat {
+    public void labhozBujik();
+    public void simogathato(); 
+    stb.
+  }
+
+A hozzájuk tartozó kódokat a példányosítható osztály tartalmazza:
+
+  public class Macska extends Allatok implements Haziallat {
+
+  @Override
+  public void labhozBujik() { és ide jön a kód }
+
+  @Override
+  public void simogathato() { és ide jön a kód }
+
+  }
+
+KÖTELEZŐ overrideolni MINDENT ami az interface-ban deklarálva van!
+(A kód persze lehet üres, lényeg, hogy létezzen a metódus.)
+
+Egy class több interface-t is implementálhat, vesszővel sorolhatjuk őket egymás után.
+
+
+
+És miért jó az interface?
+
+Mondjuk ha át akarom adni egy függvénynek az állatot így:
+
+  public static void fuggveny(Allatok allat) {  allat.labhozBujik(); }
+
+akkor nem biztos ám, hogy háziállat, és van is neki ilyen metódusa. Valami hülye átad egy oroszlánt, és kész a runtime error.
+
+
+Ellenben ha azt írom, hogy ide egy Haziallat típust várok:
+
+  public static void fuggveny(Haziallat allat) {  allat.labhozBujik(); }
+
+akkor a hiba már nem futásközbeni, hanem fordítási!
+
+
+Léteznek un. jelölő interface-ek (pl. Serializable) amelyekhez nem kell implementálni semmit.
+                                           |
+                                           +---- csomagokra bontható, és máshova továbbítható
+
+
+Package
+=======
+
+A package egy könyvtárrendszer, a láthatóságot befolyásolja, a project szervezhető velük.
+
+1. Arra jó, hogyha megosztjuk a kódunkat másokkal, akkor a "base package" referál arra a szervezetre, amely készítette a kódot.
+
+2. nem kell áttekinthetetlenül hosszú kódokat írni, illetve az egyszer megírt kód másik projecthez is felhasználható.
+
+3. A lehet több különböző, azonos nevű objektumot és metódust létrehozni, és a package importálásánál megválaszthatjuk, hogy melyiket akarjuk használni?
+   Ezzel a névütközések elkerülhetőek.
+
+Két különböző, de azonos nevű osztály használata egy mainban:
+
+--- első osztály ---
+
+package com.greenfox.packages.example;
+
+public class Book {
+  string title;
+}
+
+--- második osztály ---
+
+package com.greenfox.packages.press;
+
+public class Book {
+  string content;
+}
+
+--- main ---
+package com.greenfox;
+
+import com.greenfox.packages.press.Book;
+
+public class Main {
+
+  public static void main(String[] args) {
+    //egyik könyv osztályát beimportáltuk a fejlécben, ezért utána ugyanúgy használható, mint egy lokális változó
+    Book egyikKonyv = new Book();
+    //másik könyv osztályát nem tudja beimportálni a névegyezés miatt, de teljes hivatkozással ez is elérhető
+    com.greenfox.packages.example.Book masikKonyv = new com.greenfox.packages.example.Book();
+  }
+
+}

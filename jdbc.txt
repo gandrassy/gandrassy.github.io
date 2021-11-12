@@ -1,0 +1,440 @@
+
+
+Java Database Connectivity (JDBC) API 
+-------------------------------------
+
+A kétrétegű modellben az applet vagy alkalmazás közvetlenül az adatforrással kommunikál. A program kódja közvetlen eléréssel rendelkezik az adatforráshoz, és közvetlenül kapja vissza az eredményt. Az adatforrásnak nem szükséges ugyanazon a gépen lennie, mint az alkalmazásnak.
+
+A háromrétegű modellben az utasítások nem közvetlenül az adatforráshoz futnak be, hanem egy köztes szolgáltatási réteghez (middleware-hez), amely továbbítja az utasítást az adatforráshoz. Az adatforrás sem közvetlenül az alkalmazásnak küldi vissza az eredményt, hanem a köztes szolgáltatási rétegnek, amely továbbítja azt az alkalmazás felé. Olyan esetekben érdemes háromrétegű modellt használni, amelyekben felügyelnünk kell az adatokhoz történő hozzáférést és módosítást.
+
+
+A javaban az SQL-utasítást tartalmazó sztring végén nincs utasítás lezáró pontosvessző!
+Futásidejű kivétel váltódik ki, ha pontosvesszőt írunk a sztring végére.
+
+
+Statement utasítás 
+------------------
+
+Egyszerű SQL-utasításokat hajt végre. Olyanokat, amelyek teljes szövege ismert a program
+készítésekor. Pl. egy SQL minden rekordjának belolvasása egy List<Object>-be:
+
+import hu.unideb.inf.progtech.booketdvdstore.entity.Address;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SampleJdbc {
+
+public List<Address> listAddresses() {
+  List<Cimek> resultList = new ArrayList<>();
+  try (Connection conn = DriverManager.getConnection(
+    "jdbc:oracle:thin:@servername.inf.unideb.hu:1521:ORCL",
+    "username", "password");                                                  // csatlakozik az adatbázishoz
+    Statement utasitas = conn.createStatement();                              // készít egy új utasítást
+    ResultSet eredmeny = utasitas.executeQuery("SELECT * FROM ADDRESSES")) {  // végrehajtja
+      Cimek cim = null;                                                       // az utasitás lehet:
+      while (eredmeny.next()) {                                               // executeUpdate vagy execute is
+        cim = new Cimek();
+        cim.setId(eredmeny.getInt("ADDRESS_ID"));
+        cim.setCountry(eredmeny.getString("COUNTRY"));
+        cim.setCity(eredmeny.getString("CITY"));
+        cim.setZipCode(eredmeny.getString("ZIP_CODE"));
+        cim.setStreet(eredmeny.getString("STREET"));
+        cim.setHouseNumber(eredmeny.getString("HOUSE_NUMBER"));
+        eredmeny.add(cim);
+      }
+  } catch (SQLException e) {
+    e.printStackTrace();
+  }
+  return eredmeny;
+}
+
+}
+
+
+PreparedStatement
+-----------------
+
+Az ilyen utasítások paraméterekkel is rendelkezhetnek, amelyekhez nem a fordításkor, hanem csak közvetlenül a végrehajtás előtt rendelődik érték. Ilyenkor a statement utasításba behelyettesített
+változók nem használhatóak, mert SQL injection támadásra alkalmasak.
+
+String custID = ...      // felhasználói felületről érkező érték
+
+try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM customers WHERE customer_id = ?")) { 
+    stmt.setString(1, custID);    // az első, kérdőjellel jelölt paraméter értékeként beállítjuk a custID változó értékét
+
+    ResultSet rset = stmt.excuteQuery(); 
+} catch (SQLException e) { }
+
+
+ugyanez több paraméterrel:
+
+public void updateAddresses(List<Cimek> cimLista) { 
+    final String utasitas = "UPDATE ADDRESSES SET COUNTRY = ?, CITY = ?, STREET = ?, HOUSE_NUMBER = ? WHERE ADDRESS_ID = ?";
+    try (PreparedStatement utasitas = conn.prepareStatement(utasitas)) {
+        conn.setAutoCommit(false);                   //az automatikus véglegesítést kikapcsolja
+        for (Cimek cim : cimLista) {
+            utasitas.setString(1, cim.getCountry());   // az első kérdőjel helyére ez kerül
+            utasitas.setString(2, cim.getCity());      // a második kérdőjel helyére ez kerül stb.
+            utasitas.setString(3, cim.getStreet());
+            utasitas.setString(4, cim.getHouseNumber());
+            utasitas.setInt(5, addr.getId());
+            utasitas.executeUpdate();
+        }
+        conn.commit();                               // véglegesítés
+    } catch (SQLException e ) { }
+}
+
+
+1. az executeQuery metódus egyetlen ResultSet objektummal tér vissza (SELECT utasítások esetében használhatjuk);
+
+2. az executeUpdate egy egész értékkel tér vissza, amely az SQL-utasítás által érintett sorok számát tartalmazza (INSERT, DELETE és UPDATE utasítások esetében), vagy 0-t, ha nem volt érintett sor, illetve ha az SQL-utasítás DDL-utasítás (például CREATE TABLE);
+
+3. az execute metódus több ResultSet-et eredményező SQL-utasítás végrehajtásakor (amennyiben a driver enged ilyet), vagy olyankor használatos, ha nem tudjuk fordítási időben meghatározni, milyen jellegű utasítás végrehajtása történik meg. Ekkor az execute logikai visszatérési értéke adja meg e kérdésre a választ: true-t ad vissza, ha lekérdezés volt a művelet (ekkor az eredményhalmazhoz a getResultSet metódussal férünk hozzá, illetve false-t, ha egyéb művelet (ekkor a getUpdateCount-tal kérhetjük le az érintett sorok számát).
+
+
+CallableStatement
+-----------------
+
+Tárolt programegységek végrehajtására szolgál. Tárolt alprogramnak nevezzük a logikailag együvé tartozó, egy bizonyos feladat elvégzésére szolgáló SQL-utasítások csoportját, amelyek lekérdezéseket vagy egyéb műveleteket tartalmaznak, amelyek az adatbázisszerveren hajtódnak végre és tárolódnak.
+
+A tárolt eljárások paramétereket vehetnek át és adhatnak vissza, amelyeknek három típusát különböztetjük meg: IN (alapértelmezés), OUT és INOUT típusú paramétereket.
+
+Tárolt függvények meghívása esetén {? = call func(?, ?)}
+Tárolt eljárások esetén {call func(?, ?)}
+
+
+Paraméter néküli tárolt függvény meghívása:
+
+CallableStatement cstmt = conn.prepareCall("{? = call SHOW_NO_OF_PERSONS}");
+cstmt.registerOutParameter(1, Types.INTEGER);
+ResultSet rs = cstmt.executeUpdate();
+while (rs.next()) {
+    int id = rs.getInt(1);
+    // itt jön a kapott érték feldolgozása
+}
+
+
+Egy IN és egy OUT paraméterrel rendelkező kétparaméteres tárolt eljárás meghívása:
+
+cstmt = conn.prepareCall("{call GET_CUSTOMER_OF_ORDER(?, ?)}");
+cstmt.setInt(1, orderId);
+cstmt.registerOutParameter(2, Types.VARCHAR);
+cstmt.executeQuery();
+String name = cstmt.getString(2);
+
+
+Két IN és egy INOUT paraméterrel rendelkező tárolt eljárás meghívása:
+
+cstmt = conn.prepareCall("{call CALC_TOTAL_DISCOUNTS(?,?,?)}");
+cstmt.setInt(1, productId);
+cstmt.setFloat(2, maxPercentage);
+cstmt.registerOutParameter(3, Types.NUMERIC);
+cstmt.setFloat(3, newPrice); 
+cstmt.execute();
+
+
+Tranzakciók kezelése
+--------------------
+
+A tranzakció olyan logikai egységet képező utasítások összege, amelyeknek vagy az együttes hatását akarjuk véglegesíteni, vagy egyiket sem közülük. 
+
+Megvalósítása:
+
+public void updateProduct(List<Product> prodList) {
+    final String updateProduct = "UPDATE PRODUCTS SET PRICE = ?, DISCOUNTS = ?, INVENTORY = ?," 
+                                                    + " TITLE = ?, PUBLISHER = ?, LENGTH = ? WHERE PRODUCT_ID = ?";
+    final String updateProductPerson = "UPDATE PRODUCTPERSON SET PERSON = ? WHERE PRODUCT = ? AND INVOLVEMENT = ?";
+    
+    if (conn.getAutoCommit())
+        conn.setAutoCommit(false);
+    try (PreparedStatement pstmtUpdProd = conn.prepareStatement(updateProduct);
+         PreparedStatement pstmtUpdProdPers = conn.prepareStatement(updateProductPerson)) {
+        for(Product prod : prodList) {
+            pstmtUpdProd.setDouble(1, prod.getPrice());
+            ...
+            pstmtUpdProdPers.setString(2, prod.getId());
+            ... 
+            pstmtUpdProd.executeUpdate();
+            pstmtUpdProdPers.executeUpdate();
+            conn.commit();
+        }
+    } catch (SQLException e ) {
+        // kivétel kezelése
+        conn.rollback(); // ha hiba volt, a tranzakció sikertelen, visszagörgetünk!
+    } finally {
+        conn.setAutoCommit(true);
+    }
+}
+
+
+Mentési pontok használata
+-------------------------
+
+A Connection.setSavepoint metódus egy mentési pontot állít be a tranzakcióban. A Connection.rollback metódus visszagörgeti a tranzakciót az utolsó véglegesítésig, vagy túlterhelt változatával a paraméterként megadott mentési pontig.
+
+if (conn.getAutoCommit())
+    conn.setAutoCommit(false);
+// utasítások végrehajtása
+try (Statement stmt = conn.createStatement()) {
+    Savepoint savepoint1 = conn.setSavepoint("Savepoint1");
+    stmt.executeUpdate("INSERT INTO PERSON VALUES ('John', 'Doe')"); 
+    stmt.executeUpdate("INSERT INTO PERSON VALUES ('Jane', 'Doe')");
+    conn.commit();
+} catch (SQLException ex) {
+    conn.rollback(savepoint1);
+}
+
+Ha visszagörgetés történt egy mentési pontig, majd véglegesítjük a tranzakciót, akkor csak a nem visszagörgetett módosítások véglegesítődnek az adatbázisban.
+
+Mentési pontok elengedése
+
+A Connection.releaseSavepoint metódus segítségével a metódusnak paraméterként átadott mentésipont-objektum törlődik az aktuális tranzakcióból. Ha eltávolítás után hivatkozni akarunk a mentés pontra egy rollback utasításból, az SQLException kivételt eredményez. A tranzakció véglegesítésével vagy teljes visszagörgetésével a benne létrehozott összes mentési pont elengedésre kerül és érvénytelenné válik. A tranzakció visszagörgetése egy adott mentési pontig az összes olyan mentési pontot érvényteleníti, amelyek a szóban forgó mentési pont beállítása után lettek létrehozva.
+
+--------------------------------------------- eddig néztem ------------------------------------------
+
+
+Mikor használjunk visszagörgetést?
+
+Amikor egy tranzakció futása közben SQLException kivétel dobódik, vissza kell görgetnünk a tranzakciót, hogy visszakapjuk az eredeti értékeket, és az adatbázis ismét konzisztens állapotba kerüljön. Ezután megkísérelhetjük a tranzakciót ismételten végrehajtani. Ez az egyetlen módja annak, hogy tudjuk, mi került véglegesítésre, és mi nem. Ha elkapunk egy SQLException kivételt, már tudjuk, hogy valami hiba történt, de arra nem derül fény, hogy a tranzakció mely része hajtódott végre, és melyik nem. Mivel nem lehetünk biztosak abban, hogy semmi nem módosult, ezért a rollback metódus hívásával kell ezt explicit módon visszagörgetnünk.
+
+    ...
+    } catch (SQLException e ) {
+        if (conn != null) {
+            try {
+                System.err.print("A tranzakció vissza lesz görgetve.");
+                conn.rollback();
+            } catch(SQLException excep) {
+                ...
+            }
+        }
+    ...
+A fenti kódrészletből láthatjuk, ahogyan az SQLException fellépése esetén visszagörgetjük az egész tranzakciót, meghívjuk a rollback metódust a catch blokkból, és így megakadályozzuk, hogy a tranzakció addigi eredményét (amely esetleg inkonzisztens adatokat tartalmazhat) használja a kódunk további része.
+
+Lekérdezések végrehajtása
+Egy lekérdezés végrehajtására a Statement interfész execute metóduscsaládját használhatjuk. Az execute metódus logikai igaz (true) értékkel tér vissza, ha az SQL-utasítás által visszaadott első objektum egy ResultSet. Logikai hamis (false) értéket akkor kapunk, ha az SQL-utasítás egy DML- vagy DDL-művelet. Elsősorban olyankor használjuk ezt a metódust, ha csak futásidőben dől el, hogy a végrehajtandó művelet lekérdezés vagy egyéb utasítás. Ez például akkor fordul elő, ha egy olyan felhasználói felületet készítünk, ahová lefuttatni kívánt SQL-utasításokat lehet beírni, ami elég tipikus forgatókönyv egy integrált fejlesztőkörnyezet esetén. Másodsorban olyan JDBC-driverek esetén lehet szükség ennek alkalmazására, amelyek támogatják a többszörös eredményhalmazokat (ilyen például az IBM DB2 drivere). Ilyenkor az egyes ResultSet objektumokhoz a getMoreResults és a getResultSet metódusok ismételt hívásával férhetünk hozzá. Az executeQuery metódus csupán egyetlen ResultSet objektummal tér vissza.
+
+Ahogyan arról már volt szó, egy ResultSet egy lekérdezés eredményhalmazát reprezentálja. Mindazonáltal ResultSet objektumot előállíthat bármely olyan objektum, amely implementálja a Statement interfészt, beleértve a PreparedStatement-et, és CallabaleStatement-et (sőt, a RowSet-et is, de ezzel nem foglalkozunk).
+
+Az eredményhalmaz-objektumban lévő adatokhoz egy kurzor segítségével férhetünk hozzá, amely gyakorlatilag egy mutató, amely az eredményhalmaz egy adott sorára mutat. Kezdetben a kurzor az első sor előtt áll. A ResultSet interfész számos metódust definiál a kurzor mozgatására. A leggyakrabban használt a next metódus, amellyel a kurzort eggyel léptethetjük. Amikor a kurzor eléri a ResultSet végét, vagyis az utolsó utáni sorra áll, a next metódus hamis értékkel tér vissza.
+
+    ...
+    Statement stmt = conn.createStatement();
+    ResultSet rs = stmt.executeQuery(query);       
+    Address address = null;       
+    while (rs.next()) {
+        address = new Address();
+        address.setId(rs.getInt("ADDRESS_ID"));
+        address.setCountry(rs.getString("COUNTRY"));
+        address.setCity(rs.getString("CITY"));
+        address.setZipCode(rs.getString("ZIP_CODE"));
+        address.setStreet(rs.getString("STREET"));
+        address.setHouseNumber(rs.getString("HOUSE_NUMBER"));           
+        resultList.add(address);
+    }
+    ...
+A ResultSet objektumokat jellemzi kurzorkezelésük módja, párhuzamos feldolgozási képességük és az, hogy milyen tartósságú kurzorokat kezelnek.
+
+Kurzorkezelés módja
+
+A kurzor kezelése szerint három típust különböztetünk meg:
+
+TYPE_FORWARD_ONLY: az eredményhalmaz nem görgethető. Kurzora csak elölről hátrafelé mozgatható, az első előtti sortól indulva végig az eredményhalmazon, az utolsó utáni sorig. Az eredményhalmaz azokat a sorokat tartalmazza, amelyek kielégítik a lekérdezést annak végrehajtásának pillanatában, vagy amikor azok visszakerülnek a hívóhoz.
+
+TYPE_SCROLL_INSENSITIVE: az eredményhalmaz görgethető. Kurzora léptethető előre- és hátrafelé is, vagy akár egy abszolút pozícióra. Az eredményhalmaz nem érzékeny az adatforrásban bekövetkező változásokra, mialatt nyitva van, vagyis az adatok változása a már megnyitott eredményhalmazokat nem érinti.
+
+TYPE_SCROLL_SENSITIVE: az eredményhalmaz görgethető. Kurzora léptethető előre- és hátrafelé is, vagy akár egy abszolút pozícióra. Az eredményhalmaz „élővé” válik, a háttérben lévő adatforrásban bekövetkező változások hatására automatikusan frissül.
+
+Az alapértelmezett típus a TYPE_FORWARD_ONLY.
+
+Megjegyzés
+Nem minden JDBC implementáció támogatja az összes típust. A DatabaseMetaData.supportsResultSetType metódus segítségével megtudhatjuk, hogy az adott típus támogatott-e vagy sem.
+
+A kurzorokra az alábbi műveletek értelmezettek:
+
+next: a kurzort a következő pozícióra mozgatja. Igaz értékkel tér vissza, ha az új pozíció egy sor, és hamis értékkel, ha a pozíció az utolsó sor után található.
+
+previous: a kurzort az előző pozícióra mozgatja. Igaz értékkel tér vissza, ha az új pozíció egy sor, és hamis értékkel, ha a pozíció az első sor előtt található.
+
+first: a kurzort az első sorra mozgatja. Igaz értékkel tér vissza, ha az új pozíció az első sor, és hamis értékkel, ha az eredményhalmaz nem tartalmaz sorokat.
+
+last: a kurzort az utolsó sorra mozgatja. Igaz értékkel tér vissza, ha az új pozíció az utolsó sor, és hamis értékkel, ha az eredményhalmaz nem tartalmaz sorokat.
+
+beforeFirst: az induló pozícióra mozgatja a kurzort, vagyis az első sor elé.
+
+afterLast: a ResultSet végére állítja a kurzort, vagyis az utolsó sor mögé.
+
+relative(int rows): a kurzort annak aktuális pozíciójához képest relatív módon mozgatja el, pozitív paraméterérték esetén a vége felé, negatív paraméterérték esetén az eleje felé lép.
+
+absolute(int row): abszolút pozícionálás, a kurzort pontosan a megadott sorra állítja
+
+Párhuzamosság
+
+A ResultSet párhuzamossága határozza meg a módosítási műveletek támogatottsági szintjét. Két párhuzamossági szintet különböztetünk meg:
+
+CONCUR_READ_ONLY: a ResultSet objektum nem módosítható a ResultSet interfész segítségével.
+
+CONCUR_UPDATABLE: a ResultSet objektum módosítható a ResultSet interfész segítségével.
+
+Az alapértelmezett párhuzamos elérési szint a CONCUR_READ_ONLY.
+
+Megjegyzés
+Nem minden JDBC implementáció támogatja az összes szintet. A DatabaseMetaData.supportsResultSetConcurrency metódus segítségével tudhatjuk meg, hogy az adott szint támogatott-e vagy sem
+
+Ha az eredményhalmaz módosítható (CONCUR_UPDATABLE), frissíthetjük az egyes sorok oszlopaiban tárolt értékeket..Ezt az updateXXX metódusok meghívásával érhetjük el, ahogyan az alábbi példák is mutatják:
+
+result.updateString("name", "Alex");
+result.updateInt("age", 55);
+result.updateBigDecimal("coefficient", new BigDecimal("0.1323");
+result.updateRow();
+Ugyanezt a hatást persze oszlopnevek helyett oszlopindexekkel is elérhetjük:
+
+result.updateString(1, "Alex");
+result.updateInt(2, 55);
+result.updateBigDecimal(3, new BigDecimal("0.1323");
+result.updateRow();
+Az updateRow metódus meghívásakor a kurzor által mutatott sor értékeivel megtörténik az adatbázis frissítése. Ha ezt a metódust nem hívjuk meg, akkor az updateXXX metódusok által elért hatás csak lokális lesz, az adatbázis tartalma nem frissül! A módosítás természetesen a tranzakciók kezelésére vonatkozó szabályok maximális betartásával történik, vagyis, ha az automatikus véglegesítés kikapcsolt állapotban van, akkor a módosítás hatása a többi tranzakció számára csak egy esetleges commit után válik elérhetővé.
+
+A módosítható eredményhalmaz segítségével új sort is felvihetünk.az alábbi módon:
+
+először egy ResultSet.moveToInsertRow() hívással egy speciális sorra, az úgynevezett puffersorra lépünk, amelyet addig használhatunk, amíg a sor összes oszlopának adatai nem ismertek,
+
+az updateXXX metódusok hívásával beállítjuk a puffersor tartalmát,
+
+és végül a ResultSet.insertRow() metódus meghívásával elvégezzük a beszúrást, majd a kurzort egy érvényes állapotba visszük.
+
+Példa:
+
+result.moveToInsertRow();
+result.updateString(1, "Alex");
+result.updateInt(2, 55);
+result.updateBigDecimal(3, new BigDecimal("0.1323");
+result.insertRow();
+result.beforeFirst();
+Kurzor tartóssága
+
+A Connection interfész commit metódus hívása bezárhatja azokat a ResultSet objektumokat, amelyek az aktuális tranzakció során jöttek létre. Néhány esetben viszont ezt el szeretnénk kerülni. A ResultSet típus tartóssági jellemzője lehetővé teszi, hogy az alkalmazás felügyelje a ResultSet objektum (kurzor) véglegesítéskor történő bezárását.
+
+Egy kurzor tartóssága az alábbi értékek valamelyike lehet:
+
+HOLD_CURSORS_OVER_COMMIT: a kurzor nem záródik be véglegesítéskor, vagyis tartós. A tartós kurzorok használata olyan alkalmazás esetében ideális, amely csak olvasható ResultSet objektumokat tartalmaz.
+
+CLOSE_CURSORS_AT_COMMIT: a kurzor (vagyis a ResultSet objektum) bezáródik a véglegesítéskor.
+
+Az alapértelmezett kurzortartóssági szint adatbáziskezelőrendszer-specifikus.
+
+Megjegyzés
+Nem minden JDBC implementáció támogatja a tartós és nem tartós kurzorokat. A DatabaseMetaData.getResultSetHoldability és a DatabaseMetaData.supportsResultSetHoldability metódusok segítségével kaphatunk információt a tartósság támogatottságáról.
+
+Statement objektumok használata kötegelt feldolgozás esetén
+A Statement és leszármazottjai segítségével több SQL-utasítást is végrehajthatunk egy ütemben. Egy Statement objektum kezdetben üres, amelyhez az addBatch metódus segítségével újabb SQL-utasításokat adhatunk. A lista kiüríthető a clearBatch metódussal, és ha már minden szükséges utasítást hozzáadtunk, az executeBatch metódussal hatjhatjuk végre. A teljes kötegelt módosítás egy egységként hajtódik végre és véglegesítődik vagy görgetődik vissza (automatikus kommitálás letiltása).
+
+6.6. példa - Kötegelt adatbázis-műveletek végrehajtása
+
+public void batchUpdate() throws SQLException {
+    Statement stmt = null;
+    conn.setAutoCommit(false);
+    try (Statement stmt = conn.createStatement()) {
+        stmt.addBatch("INSERT INTO addresses VALUES ('Magyarország', 'Debrecen', '4028', 'Kassai út', '26')");1
+        stmt.addBatch("INSERT INTO addresses VALUES ('Magyarország', 'Debrecen', '4032', 'Egyetem tér', '1')");1
+        stmt.addBatch("INSERT INTO addresses VALUES ('Magyarország', 'Budapest', '1117', 'Neumann János út', '1/C')");1
+        int[] updateCounts = stmt.executeBatch();2
+        conn.commit();
+    } catch(BatchUpdateException b) {
+        // a kötegelt feldolgozás hibáinak javítása
+    } finally {
+        conn.setAutoCommit(true);
+    }
+} 
+1
+
+A Statement.addBatch metódus segítségével egy-egy további SQL-utasítást fűzhetünk a Statement objektumban tárolt listához.
+
+2
+
+Az SQL-utasításokat elküldjük végrehajtásra az adatbázisba, majd egy eredménytömbben kapjuk vissza az egyes utasítások által érintett sorok számát az stmt-hez történő hozzáfűzés sorrendjében. Ez azért van így, mert az adatbázis a hozzáadás sorrendjében hajtja végre az utasításokat, így az eredmények is ebben a sorrendben jönnek létre.
+
+
+
+Megjegyzés
+Az SQL-utasítások elküldése után, vagyis az executeBatch metódus hívását követően a Statement objektum utasítás listája kiürül. Ezt explicit módon is kikényszeríthetjük a clearBatch metódus segítségével.
+
+Ha Statement helyett PreparedStatement objektumot használunk a kötegelt feldolgozás során, akkor az SQL-utasításoknak paramétereket adhatunk át.
+
+public void batchUpdate2() throws SQLException {
+    conn.setAutoCommit(false);
+    try (PreparedStatement pstmt = conn.prepareStatement("INSERT INTO addresses VALUES(?, ?, ?, ?, ?)")) {
+        pstmt.setString(1, "Magyarország");
+        pstmt.setString(2, "Debrecen");
+        pstmt.setString(3, "4028");
+        pstmt.setString(4, "Kassai út");
+        pstmt.setString(5, "26");
+        pstmt.addBatch();
+ 
+        pstmt.setString(1, "Magyarország");
+        pstmt.setString(2, "Debrecen");
+        pstmt.setString(3, "4032");
+        pstmt.setString(4, "Egyetem tér");
+        pstmt.setString(5, "1");
+        pstmt.addBatch();
+ 
+        pstmt.setString(1, "Magyarország");
+        pstmt.setString(2, "Budapest");
+        pstmt.setString(3, "1117");
+        pstmt.setString(4, "Neumann János út");
+        pstmt.setString(5, "1/C");
+        pstmt.addBatch();
+ 
+        int[] updateCounts = pstmt.executeBatch();
+        conn.commit();
+    } catch(BatchUpdateException b) {
+        LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+    } finally {
+        conn.setAutoCommit(true);
+    }
+}
+
+A kapcsolat lezárása
+Miután befejeztük munkánkat a Statement objektummal, célszerű azonnal bezárni a close metódus meghívásával, hogy az erőforrásokat, amelyeket magához köt, engedje el. E metódus hívásakor a Statement összes ResultSet objektuma is bezárul. Az erőforrások felszabadítása lényeges szempont, így arról szintén gondoskodnunk kell, hogy hiba fellépésekor is lezáródjon a Statement objektum. Ezen okból kifolyólag érdemes a lezárást egy finally blokkba tenni, hogy mind sikeres lefutás, mind hiba esetén felszabaduljanak az erőforrások.
+
+...
+} finally { 
+    if (stmt != null) { 
+        stmt.close(); 
+    }
+}
+A Java SE 7-es verziójától kezdve használhatunk try-with-resources blokkot az erőforrások lezárására. Ez a konstrukció a finally blokkot helyettesíti a try blokk fejében, hatása ugyanaz, mint finally alkalmazásakor: mind sikeres, mind sikertelen futás után bezáródik az objektum.
+
+...
+try (Statement stmt = conn.createStatement();
+     ResultSet rset = stmt.executeQuery(query)) {
+    while (rset.next()) {
+        ... 
+    }
+} catch (SQLException e) {
+    ...
+} 
+Kivételek kezelése
+Ha a JDBC az adatforrással történő interakció során hibába ütközik, egy SQLException kivétel váltódik ki. Ez a kivételobjektum segítségünkre lehet a hiba forrásának felderítésében.
+
+Egy SQLException objektum a következő információkat tartalmazza:
+
+A hiba leírása, amelyet az SQLException.getMessage metódussal kérdezhetünk le.
+
+Egy SQL állapotkód. Ez egy szabványosított, öt alfanumerikus karakterből álló szting, amelyet az SQLException.getSQLState metódus ad vissza.
+
+Egy hibakód. Ez az egész érték annak a hibának az azonosítója, amely az SQLException-t kiváltotta. A hibakódot az SQLException.getErrorCode metódus hívásával kaphatjuk meg.
+
+Egy ok. Az SQLException ok-okozati kapcsolatban lehet más kivételekkel. A teljes ok-okozati láncot végigjárhatjuk az SQLException.getCause metódus ismételt hívásával, egészen amíg az null-t nem ad vissza.
+
+Hivatkozás láncolt kivételekre. Ha nem csak egy hiba lép fel, e lánc mentén végiglépkedhetünk a kivételeken. A láncolt kivételeket a dobott kivétel SQLException.getNextException metódusán keresztül érhetjük el.
+
+Figyelmeztetések. Az SQLWarning objektumok az SQLException leszármazottai, amelyek adatbázis elérési figyelmeztetéseket reprezentálnak. A figyelmeztetések nem szakítják meg az alkalmazás futását úgy, mint a kivételek. A figyelmeztetések mindössze azt tudatják a felhasználóval, hogy valami nem a terv szerint alakult. Például egy jog visszavonásakor az mégsem vonódik vissza, vagy lekapcsolódás közben történik valami váratlan esemény.
+
+Egy figyelmeztetés megjelenhet egy Connection, egy Statement vagy egy ResultSet objektumon. E típusok mindegyike rendelkezik egy getWarnings metódussal, amelyet meghívva visszakapjuk az első figyelmeztetést. Ha a getWarnings egy újabb figyelmeztetéssel tér vissza, az SQLWarning osztály getNextWarning metódusának segítségével végigiterálhatunk a további figyelmeztetéseken. Egy Statement végrehajtása automatikusan törli az előző utasítás figyelmeztetéseit, tehát azok nem gyűlnek fel. Ez ugyanakkor azt jelenti, hogy ha szükségünk van a figyelmeztetésekre, akkor egy új SQL-utasítás végrehajtása előtt kell lekérdeznünk azokat.
+
+A BatchUpdateException kivétel. BatchUpdateException kivétel akkor dobódik, ha kötegelt módosítás feldolgozása közben lép fel hiba. Egy BatchUpdateException objektum egyebek mellett a módosítások által érintett sorok számait is eltárolja egy egész típusú tömbben.

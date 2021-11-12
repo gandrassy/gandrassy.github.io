@@ -1,0 +1,56 @@
+C - create - post
+R - read   - get
+U - update - put
+D - delete - delete
+
+
+
+@RestController      
+public class UserController;
+
+@GetMapping("/users")
+@ResponseBody       // ha nincs ez az annotáció, 404-es státuszkódot ad vissza 200 ok helyett.
+public List<User> getUser() {
+  return someList;
+}
+
+@PostMapping("/newuser")
+@ResponseBody          // ha ez itt van, akkor nem kell a @ResponseBody-kat minden végponthoz kiírni.
+public ResponseEntity createUser(@RequestBody User user) {
+  userRepo.add(user);
+  return ResponseEntity.status(HttpStatus.NO_CONTENT).build();   /204-es visszatérési kód: minden rendben, nincs visszatérési adat
+}                                
+
+A post kérések kereséséhez a Postman alkalmazást használja. 
+A http Body-ban küldi a kérést, kiválasztva a raw opciót. Kap egy kurzort, oda írtja:
+{ "username": "petike",
+  "active": true,
+  "registerat": "2021-02-23T22:45:11" }
+
+A headerben megadja, hogy: Content-Type  :  application/json
+
+a booleant postoláskor csak úgy kell megadni, hogy "active", különben nem találja meg a setActive() settert. Lekéréskor viszont úgy kapja, hogy "isactive" mert a getter neve meg az.
+
+@PutMapping("/users/{userId}")
+public ResponseEntity updateUser(@PathVariable Long userId, @RequestBody User user) {
+  if ( userId != user.getId() ) {
+    return ResponseEntity.badRequest().build();  // 400 hibakód
+  }
+  // adatbázisműveletek
+  return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+}
+
+@DeleteMapping("/users/{userId}")
+public ResponseEntity deleteUser(@PathVariable Long userId) {
+  // adatbázisműveletek
+  return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+}
+
+
+Logolás
+=======
+
+
+
+Adat küldése távoli restnek
+===========================

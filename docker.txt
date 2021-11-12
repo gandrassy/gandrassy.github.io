@@ -1,0 +1,28 @@
+A Docker (dotCloud) egy cloud szolgáltató vállalat.
+
+open source / enterprise edition létezik. 
+
+A konténer előnye, hogy a fizikai gépen csak egy OS fut, és a konténerekben csak egy-egy alkalmazás és a függőségei vannak. Ez az imidzs file. És bárhol üzembe helyezhető.
+
+Előnyei: 
+  - másodpercek alatt bootol 
+  - kisebb mint egy virtuális gép, és kevesebb menedzselést igényel
+  - jobb az erőforrás kihasználás
+  - azonnal indítható, nem igényel kiegészítő telepítéseket
+  - skálázható
+
+Hátrányai:
+  - nem teljes az izoláció, mint egy virtuális gépnél
+
+
+A docker egy CLI felületet ad, ami egy rest api kérést küld a host gépen a docker démonnak, hogy indítsa el az imidzset.
+
+AMit vindózon fordítunk, az csak vindózon fut, amit linuxon, az csak linuxon!
+
+
+Képfájl készítése:
+
+  1 kell egy alap képfile (pl. alpine linux)
+  2 a kód befoglalása után újból ellenőrizni biztonságos-e?
+  3 többfázisú bild: lehetőleg a bináris futtathatókat foglaljuk bele
+  

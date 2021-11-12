@@ -1,0 +1,290 @@
+
+Dinamikus tömbök
+================
+
+import java.util.Arraylist;  szükséges!
+
+Bizonyos esetekben gyorsabb, mint a hagyományos tömbök, máskor viszont nem. 
+Primitív típusokat nem tud tárolni.
+
+ArrayList<String> myFirstElements = new ArrayList<>();
+
+myFirstElements.add("Kristóf");
+myFirstElements.add("péter");
+myFirstElements.add("Irma");
+myFirstElements.add("Jolán");
+
+kiírjuk az egészet:
+  system.out.println( myFirstElements.toString() );
+
+egy elem kiolvasása:
+  String SecondName = myFirstElements.get(1);
+
+elem kicserélése:
+  myFirstElements.set(1, "Péter");
+
+elem törlése:
+  myFirstElements.remove(1);        //második elem törlése
+  myFirstElements.remove("Irma");   //Irma eltüntetése   de csak az első előfordulásét! Ha többször is szerepel, akkor marad még.
+
+
+
+Tartalommal való feltöltés a deklarálás során:
+  ArrayList<String> mySecondElements = new ArrayList<>(Arrays.asList("Rudolf", "Boldizsár", "Piroska", "Gitta"));
+
+A két arrylist összefűzése:
+  myFirstElements.addAll(mySecondELements);
+
+Egy arraylista átmásolása egy másikba:
+  mySecondElements = (ArrayList<String>) myFirstElements.clone();
+
+
+Van benne bármi is? - boolean a vége
+  myFirstElements.isEmpty();
+
+elemek számának lekérdezése:
+  myFirstElements.size();
+
+a tömb kitörlése:
+  myFirstElements.clear()   //azt javasolja, hogy ne használjuk, hanem inkább  myFirstElements = new ArrayList<>(); így új referencia keletkezik, így ha a régi 
+                            //referenciát használják még objektumok, akkor megmarad nekik, ha meg már nem használja senki, úgyis eltünteti a java virtual machine
+
+megkérdezem, van-e benne Péter?
+  myFirstElements.contains("Péter");
+
+
+átalakítása hagyományos tömbbé:
+
+  Object[] myObject = myFirstElements.toArray();
+
+átalakítása hagyományos string tömbbé:
+
+  String[] myStringArray = myFirstElements.toArray(new String[0]);
+
+
+Visszafelé:
+ ArrayList<String> namesHere = new ArrayList<>();
+ namesHere.addAll(Arrays.asList(myStringArray));
+
+
+Dinamikus tömb számokkal:
+-------------------------
+
+
+ ArrayList<Integer> integers = new ArrayList<>();          // fontos, hogy itt nagybetűs típus használandó! Double, Boolean, Byte, Long stb. Ezek REFERENCIA TÍPUSOK
+
+ Integer exampleInteger = null; // a ref. tipeknek lehet ilyen értéke is.
+ int testValue = 12123;
+ testValue = exampleInteger;   // futásidejű hibát ad, mert nem tudja átalakítani primitív számmá 
+
+
+
+Arraylistben nincs több dimenziós, viszont Arraylisteket egymásba lehet ágyazni:
+
+ArrayList<Integer> numbersFirstDimension = new ArrayList<>();
+
+ArrayList<ArrayList<Integer>> matrixlist = new ArrayList();   //figyelni arra, hogy ezt NEM tölti fel inicializáláskor nullákkal!
+
+tmp = new ArrayList<>(Arrays.asList(1,2,3)));  //első sor feltöltése
+matrixList.add(tmp);
+
+tmp = new ArrayList<>(Arrays.asList(4,5,6)));  //második sor feltöltése
+matrixList.add(tmp);
+
+tmp = new ArrayList<>(Arrays.asList(7,8,9)));  //harmadik sor feltöltése
+matrixList.add(tmp);
+
+
+egy elem lekérése: matrixList.get(1).get(1);
+
+
+HashMap
+=======
+
+Kulcsérték párokat tartalmaz, például
+
+  HashMap<String, Integer> userAges = new HashMap<>();
+
+  userAges.put("Pisti", 32);
+  userAges.put("Karcsi", 28);
+  userAges.put("Jolán", 34);
+  userAges.put("Irma", 35);
+
+  System.out.println(userAges);
+
+elem értéke:
+
+  System.out.println("Karcsi kora: " + userAges.get("Karcsi") );
+
+  userAges.isEmpty()
+  userAges.size()                //elemek száma
+  userAges.containsKey("Jolán")
+  userAges.containsValue(28)
+
+elem törlése:
+  myMap.remove("Karcsi");     //kulcs alapján
+  myMap.values().remove(34);  //érték alapján (ez egy adatbázis bejárás)
+
+Egy kulcs csak egyszer szerepelhet a Hashmapban. Ha új értékadás van azonos kulccsal, akkor kicseréli az értéket, de visszaadja az előző értéket. Pl:
+
+  Integer prevousValue = userAges("Irma", 82);  //ha nem volt előző érték, akkor null-t ad vissza
+
+
+A hashmap, szemben az Arraylisttel, nem sorrendban tárolja az értékeket! Ha a berakás sorrendjét is meg akarjuk őrizni, akkor LinkedHashMap típus használandó.
+                                                                                                                              -------------
+
+A HashMap bejárása:
+
+  Set<String> keys = userAges.keySet();   //a set egy olyan adatszerkezet, amelybe értékek tehetők, de minden érték csak egyszer szerepelhet
+
+  for (String k : keys) {
+    system.out.println(k);
+  }
+
+  
+  Collection<Integer> values = emailAges.values();
+  for (Integer i : values) {
+    system.out.println(i);
+  }
+
+
+hatékonyan és egyszerre végigjárni:
+
+  for (Map.Entry<String, Integer> entry: userAgers.entrySet() ) {
+    String key = e.getKey();
+    Integer value = e.getValue();
+    System.out.println("Key: " + key + " Value: " + value);
+  }
+
+
+HashMap eleme lehet Arraylist is, így egy kulcshoz több érték is tartozik.
+
+
+TreeMap
+=======
+
+Uaz, mint a Hashmap, de a bejegyzéseket, a hozzáadás sorrendjétől függetlenül, key szerint ABC rendbe rendezve tárolja.
+A magyar ékezetes karaktereket nem ismeri az ABC-je, azokat a "z" betű után rendezi.
+Definiálni és haszálni ugyanúgy kell, mint a HashMap-ot.
+
+
+
+Collection enyim = Arrays.asList(tomb);
+
+
+equals() 
+  az object osztályban van definiálva.
+  Alaphelyzetben a referenciaegyenlőséget vizsgálja, 
+  de a Stringben, a primitívekben és az ArrayListben felül van írva, de minden más esetben felül kell definiálni:
+
+  @Override
+  public boolean equals(Object bejovo) {
+    if (bejovo == null) return false;
+    if (bejovo.getClass() != Ember.class) return false;  // ha nem Miosztályunk a bejövő object, akkor nem száll el.
+    return Object.equals(this.szigszam, ((Ember) bejovo).szigszam );  // azért használja az ősmetódust, mert ez tud kezelni null bejövőt is, a String.equals() viszont exceptiont dob
+  }
+
+
+hashCode()
+  olyan fv. amely egy bármilyen hosszúságú adatot leképez egy int-re. (információvesztéssel)
+  Ugyanarra az bemeneti adatra mindig ugyanazt adja vissza, de kis mértékben eltérő bemenetre nagy mértékben eltérő adatot ad vissza.
+  Keresésnél használatos: adatgyűjtéskor a hash kódokat csoportosítjuk, és kereséskor csak a keresőkód hash-ének megfelelő halmazon kell végigmennünk.
+  bármilyen Object.toString() visszatérési értéke osztály neve@példány memóriacíme.
+
+  Azon classoknál, ahol az equals metódust felüldefiniáltuk, a hash() metódust is felül kell definiálnunk, hogy ugyanazon az elven alapuljon:
+
+  @Override
+  public int hashCode() {
+    return Object.hash(neve, szigszam);
+  }
+
+Ha equals, akkor uaz kell legyen a hashcode és vica versa, tehát ugyanazok alapján a fieldek alapján kell őket képezni.
+
+Iterable interface:
+  vissza tud adni egy iterátort, ami egy mutató, a következő objektumot mutatja. Pl: while (iterator.hasNext()) { sout(iterator.next()); }
+  vissza tud adni egy spliterator-t
+  van for-each-ja
+  ezt terjeszti ki a Collection.
+
+Collection interface: az alábbiak szülője. Egy olyan adatszerkezet, amihez hozzá lehet tenni, és amiből el lehet venni.
+--------------------  van egy olyan konstruktora, amely egy bármilyen collection gyereket vár, és annak elemeik referenciáit egyenként lemásolja.
+
+List: az elemeket sorrendben tartalmazza, indexelve, duplikálhatóak
+      leszármazottai: ArrayList - a primitív tömbhöz hasonló, a végére könnyű írni, de a közepére nem. kevesebb területet foglal, mint egy LinkedList
+                      LinkedList - az elemek egymáshoz kapcsolódnak, ezért ha kiveszünk belőle egyet, akkor csak az utána jövő referenciáját kell átírni
+                                   megőrzi a sorrendet, de a memóriában nem biztos, hogy sorban vannak az elemek. Viszont egy közbülső elem csak akkor érhető
+                                   el benne, ha valamelyik végétől fogva végigjárjuk.
+                      Vector - uaz mint az ArrayList, de thredsafe, vagyis szinkronizált (multiprocess környezetben)
+
+Set: nem indexelhető, nem duplikálható
+     leszármazottai: HashSet - hashcode alapján különbözteti meg az elemeket. Ha bejárjuk, nem mindig ugyanabban a sorrendben kapjuk az elemeket.
+                     LinkedHashSet - megőrzi a sorrendet, ezért mindig ugyanabban a sorrendben bejárható
+                     SortedSet - csak olyan objektumok tehetők bele, amelyek implementálják a comparable interface-t, és a szerint sorba rendezi.
+                                 altipusa a TreeSet, amely egy fa struktúrában tárolja az elemeket
+
+Queue: megadott sorrendben feldolgozandó elemek (FIFO = (first in - first out) ez a queue, LIFO = stack)
+       PriorityQueue
+
+
+
+Iterable: olyan adatszerkezetek, amelyek foreach loopal bejárhatóak. van egy iterátora, amely egy elemre mutat, és ez léptethető
+
+
+Map interface: kulcsokhoz rendel értékeket. Egy kulcs, egy érték.
+-------------
+
+Hashmap: a klulcsoknak a hashcode-ját tárolja. Bejárása során nem mindig ugyanabban a sorrendben adja az elemeket.
+         leszármazottja: a LinkedHashMap, amely tárolja a sorrendet is.
+
+HashTable: egy threadsafe Hashmap, több szálú programokban használatos
+
+SortedMap: már a beszúráskor sorba rendezi az elemeket, ha van comparable()
+
+
+
+
+
+
+
+
+Gráfok
+------
+
+A fa struktúra egy olyan gráf, ahol nincsenek körök, vagyis egy node-hoz csak egy úton lehet eljutni.
+
+     1
+   /   \
+  2     3
+ / \   / \
+4   5 6   7
+
+A gráf ábrázolása
+
+int[] balancedTree = { 1, 2, 3, 4, 5, 6, 7 };
+
+hogykinek ki a gyereke, megmondja a képlet: n*2+1
+
+
+Általánosabb ábrázolás:
+
+public class Node {
+
+  public List<Node> neighboors;
+
+}
+
+
+
+bejárási algoritmusok:
+
+1. BFS - breadth first search
+Kiindulunk valamelyik node-ból, majd megnézi annak az összes leszármazottját, aztán a leszármazottak összes leszármazottját... stb.
+
+2. DFS - depth first search
+Kiindulunk valamelyik node-ból, majd megnézi annak az első leszármazottját, annak az első leszármazottját stb egészen amíg el nem ér
+a legaljára, utána visszalép egyet, és megnézi a szomszédját és annak leszármazottjait stb.
+
+implementálásukhoz hashsetet használ a már bejárt objektumok tárolására.
+
+
+

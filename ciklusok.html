@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Primitív típusok</title>
+</head>
+<body>
+
+<h1>Ciklusok</h1>
+
+<p>
+  for (int i=0; i<5; i++) {        először inicializálódik: int i=0; ez csak egyszer fut le<br>
+  }                                utána teszteli a kilépési feltételt, ha false, akkor nem futtat le semmit<br>
+                                   utána lefut a ciklus magjában lévő utasításblokk<br>
+                                   ekkor értékelődik ki a harmadik kifejezés: i++, és teszteli a kilépési feltételt stb.<br>
+</p>
+
+<p>
+  String[] names = { "Elek", "Mihaly", "Margit" };     FOR-EACH ciklus<br>
+  for (String nev : names) {       a forciklus a fenti tömb értékeit veszi fel addig, amely minden sorra nem kerül.  <br>
+    println(nev);<br>
+  }
+</p>
+
+<p>
+  int i=10;<br>
+  while (i<13) {                   előltesztelő ciklus: ha a feltétel true, végrehajtja. Lehet, hogy egyszer sem fut le.<br>
+     i++;<br>
+  }
+</p>
+
+<p>
+  i=1;                             először végrehajt mindent, utána nézi a feltételt, hogy megismételje-?<br>
+  do {<br>
+     i++;<br>
+  } while (i<13);
+</p>
+
+<p>
+A ciklusoknál van még két parancs:<br>
+<br>
+break - kiugrik a ciklusból<br>
+continue - a ciklus egy futását kihagyja<br>
+<br>
+Ezeket általában felhasználói interakciók kezelésére használjuk.<br>
+<br>
+i = 0;<br>
+do {<br>
+  i++;<br>
+  if i=5 { break; } <br>
+ } while i<=20<br>
+ <br>
+//ötnél kiugrik<br>
+<br>
+i = 0;<br>
+do {<br>
+  i++;<br>
+  if (i % 2 != 0) { continue; } <br>
+  sout(i)<br>
+ } while i<=20;<br>
+ <br>
+//csak a páros számokat írja ki
+</p>
+
+</body>
+</html>

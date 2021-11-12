@@ -1,0 +1,184 @@
+
+
+Tömbök
+======
+
+
+Egydimenziós tömbök
+-------------------
+
+  deklarálása:
+  ------------
+    int[] szamok = new int[10];     10 elemű integer tömb létrehozása. Minden elem 0 értékű lesz.
+
+  alternatív deklarálási változat:
+  --------------------------------
+    int[] szamok;                   deklarálom hogy lesz egy szamok valtozó, ami rámutathat tömbre
+    szamok = new int[10];           létrejön a tömb, és rámutat a változó
+
+  A tömb indexelése 0-al kezdődik. Jelen példában: szamok[0] ... szamok[9]
+
+  szamok.length megadja a tömb elemeinek számát. Nincs () utána!
+
+  A tömb létrehozásakor minden elemet alapértelmezett értékre inicializál, jelen esetben ez 0.
+  Ez csak a tömböknél van így, primitív változók deklarálásakor nem, azoknak deklaráláskor kell értéket adni.
+
+  Tömb összes elemének kiíratása: 
+    System.out.println(Arrays.toString(szamok));   ez így ír ki: [0, 0, 0, 0, 0, 0, 0, 0, 0 0]
+
+
+Többdimenziós tömbök
+--------------------
+
+  deklarálása:
+  ------------
+
+    int[][] szamok = new int[4][6];   négy soros, hat oszlopos táblázat
+
+  a táblázat állhat különböző magasságú oszlopokból is, ezt így deklaráljuk:
+
+    int[][] szamok = new int[4][];             0 0 0 0
+    int[] data1 = new int [4];                 0 0 0 0
+    int[] data1 = new int [7];                 0 0 0 0
+    int[] data1 = new int [3];                 0 0   0
+    int[] data1 = new int [6];                   0   0
+    szamok [0] = data1;                          0   0
+    szamok [2] = data2;                          0
+    szamok [3] = data3;
+    szamok [4] = data4;
+
+
+bejárása for ciklussal:
+
+  for (int i=0; i<szamok.length; i++) {
+  } 
+
+
+
+  Három dimenziós tömbök is készíthetőek.
+
+
+
+Referencia típusú tömb
+----------------------
+
+  String[] nevek = new String[4];     mivel a String referencia típusú, ezért ebben a tömbben csak négy mutató lesz, amely bizonyos memóriaterületekre mutat
+
+  lehet értékadással is:
+
+  String[] nevek {"John", "Aaron", "Valerian", "Anthony"};
+
+  két dimenzóban:
+  String[] nevek {{"John", "Aaron", "Valerian", "Anthony"}, {"Ronald", "Joe", "Marvin", "Luke"}};
+
+
+Műveletek tömbökkel
+-------------------
+
+   szamok.length      - megadja, hány elemből áll a tömb. szamok[0] az első, és szamok[szamok.length-1] az utolsó
+   szamok[1].length   - ugyanaz kétdimenziós tömbben
+
+   System.arraycopy(ebbolATombbol, kezdoelem_szama, ebbeATombbe, ettol, eddig);
+   pl:
+      char[] egyikTomb = { 'd', 'e', 'c', 'a', 'f', 'f', 'e',
+			    'i', 'n', 'a', 't', 'e', 'd' };
+      char[] masikTomb = new char[7];
+
+      System.arraycopy(egyikTomb, 2, masikTomb, 0, 7);
+      System.out.println(new String(copyTo));                  - "caffein"
+
+   alternatív megoldás:
+      char[] masikTomb = java.util.Arrays.copyOfRange(egyikTomb, 2, 9);
+
+   sorba rendezés:
+      Arrays.sort(egyikTomb);
+
+   string tömbbé alakítása:
+     char tempArray[] = inputString.toCharArray();
+  
+   vissza:
+     String outputString = new String(tempArray); 
+
+
+
+Metódusok (Függvények)
+======================
+
+  Nevük szintén kis betűvel kezdődik és camelcase.
+
+  A main metódus mintájára:
+
+  public /* láthatóság */ static /* visszatérési érték típusa, lehet int, char stb, a void nem ad vissza semmit*/ fuggvenyNeve(String valtozo)
+    {  } /* törzs */
+
+  
+  példa függvény:
+
+  static int osszead(int a, int b) {
+    return a+b;
+  }
+
+  return; a void függvényekben is használható, hogyha meg akarjuk szakítani a futását.
+
+  javanal referencia szerint adja át a paramétereket a függvény, ezért aztán ha a függvényen belül módosít az adaton, akkor globálisan 
+  módosul az adott változó.
+
+  Egy függvény meg tudja hívni saját magát is (rekurzív hívás)- Pl. Fibonachi sor: ( 0 1 0+1 1+1 1+2 2+3 3+5 5+8 stb. mindig az előtte lévő két elem összege)
+
+  static int fibonacci(int n) {
+     if (n<2) retourn n;
+     return ((fibonacci(n-2) + fibonacci(n-1));
+  }
+
+
+metódus, amelynek a visszatérési értéke egy tömb:
+
+  static int[] makeArray (int first, int second) {
+     int[] array = {first, second};
+  }
+
+meghívása:
+  System.out.println (Arrays.toString (makeArray(1,2)) );
+
+
+
+ez a függvény akárhány bemeneti paraméterrel meghívható:
+
+static String makeNamesArray(String... names) {
+  String [] namesArr = names;
+  String tmp ="";
+  for (String name : namesArr) {
+  tmp += name + ", ";
+  }
+  return tmp;
+}
+
+
+Generikus:
+ egy speciális típus, amibe bármi bekerülhet. Pl. az alábbi eljárás bármilyen tömbbel meghívható
+
+  public static <A> void kiiratas(A[] tomb) {
+    for (A elem : tomb) { system.out.println(elem); }
+  }
+
+
+Rekurzió
+========
+
+A függvény saját magát hívja meg.
+Akkor használható, hogyha a problémában van egy részprobléma, amely azonos módon oldható meg, mint az alapprobléma.
+
+Pl. faktoriális. 5! = 5*4*3*2*1
+Felírható úgy is, hogy 5 * 4!
+De a 4! felírható úgy is, hogy 4 * 3!
+
+tehát a rekurziv fügvény:
+
+public static void int faktorialis (int szam) {
+  if (szam == 1) { return 1; }                   // base case, vagyis alapeset, ahol véget ér a rekurzió
+  return szam * faktorialis(szam-1);             // rekurzív hívás
+}
+
+tipikus felhasználása a fa struktúra bejárása.
+
+

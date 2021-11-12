@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Primitív típusok</title>
+</head>
+<body>
+<h1>Változók</h1>
+
+<h2>Primitív típusú változók</h2>
+<h3>egész számok</h3>  
+<table>
+<tr>
+  <td>byte</td>
+  <td>8 bit</td>
+  <td>-128...127</td>
+</tr>
+<tr>
+  <td>Short</td>
+  <td>16 bit</td>
+  <td>-32768...32767</td>
+</tr>
+<tr>
+  <td>int</td>
+  <td>32 bit</td>
+  <td>-2,14mrd...2.14mrd</td>
+</tr>
+<tr>
+  <td>long </td>
+  <td>64 bit</td>
+  <td></td>
+</tr>
+</table>    
+    
+<h3>lebegőbontos (tört) számok</h3>
+<table>
+    <tr>
+      <td>float</td>
+      <td>32 bit</td>
+      <td>ritkábban használatos</td>
+    </tr>
+    <tr>
+      <td>double</td>
+      <td>64bit</td>
+      <td></td>
+    </tr>
+</table>    
+<p>boolean - logikai érték, true vagy false</p>    
+<p>enum - a booleanhoz hasonló, de több értéket is felvehet</p>  
+<p>char - 16biten ábrázolva egy UNICODE karakter</p>
+<p><u>Ezeket a típusokat érték szerint adja át a java.</u></p>
+
+<h2>referencia típusúak</h2>
+<ul>
+<li>Integer</li>
+<li>String</li>
+<li>Character</li>
+<li>Object</li>
+</ul>
+<p>
+  Ezeknek értéke nincs, csupán rámutatnak egy bizonyos memóriacímre. Ezért ha értéküket másik 
+  változónak adjuk át, az nem foglal le új tárterületet a memóriában, ugyanazt a területet kezeli.
+</p>
+
+
+<h1>Változók deklarációja</h1>
+<table>
+  <tr>
+    <td>int c;</td>
+    <td>legyen egy változó</td>
+  </tr>
+  <tr>
+    <td>int d = 10;</td>
+    <td>legyen egy változó, aminek az értéke 10</td>
+  </tr>
+  <tr>
+    <td>float f= 12,5F;</td>
+    <td>a float végére kell egy f, különben double-nak értelmezi.</td>
+  </tr>
+  <tr>
+    <td>char h = 'A';</td>
+    <td>legyen egy karakter, aminek az értéke A</td>
+  </tr>
+</table>   
+<p>
+  enum szin { RED("piros",900),<br>
+              GREEN("zöld",090),<br>
+              BLUE("kék",009)<br>
+              private szin(String neve, Integer ralcode) {};<br>
+              private String name();<br>
+              private enum valueOf(String x);  // throws illegal argument exception<br>
+            };
+</p>
+   
+
+<h3>értékadás már deklarált változónak:</h3>
+  c = 5; 
+
+<h2>2. operátorok</h2>
+
+<h3>numerikus</h3>
+<table>
+  <tr>
+    <td>d + c</td>
+    <td>összeadás</td>
+  </tr>
+  <tr>
+    <td>d - c</td>
+    <td>kivonás</td>
+  </tr>
+  <tr>
+    <td>d * c</td>
+    <td>szorzás</td>
+  </tr>
+  <tr>
+    <td>d / c</td>
+    <td>osztás</td>
+  </tr>
+  <tr>
+    <td>d % c</td>
+    <td>az osztás maradékát adja meg (két egész szám osztásának minfig 0 1 2 vagy 3 a maradéka)</td>
+  </tr>
+</table>   
+     
+<h3>logikai</h3>
+<table>
+  <tr>
+    <td>b1 && b2</td>
+    <td>AND</td>
+  </tr>
+  <tr>
+    <td>b1 || b2</td>
+    <td>OR</td>
+  </tr>
+</table>
+ 
+<h3>értékadás operátorok</h3>
+<table>
+  <tr>
+    <td>i = j;</td>
+    <td>a jobb oldali érték belemásolódik a bal oldaliba.</td>
+  </tr>
+  <tr>
+    <td>i += j;</td>
+    <td>i értékét növeli j értékével</td>
+  </tr>
+  <tr>
+    <td>i *= j;</td>
+    <td>i értékét megszorozza j értékével</td>
+  </tr>
+</table>
+
+<h2>Operátorpreferencia:</h2>
+<p>
+a legutoljára végrehajtott utasítás az = += -= <br>
+ utána a logikai operátorok: ?:  ||  && sorrendben<br>
+  egyenlőség, egyenlőtlenség == !=<br>
+   utána a relációs operátorok < > <= >= (az egyenlőségjelnek mindig jobb oldalon kell lennie!)<br>
+    utána a string összefűzés + jellel<br>
+     szorzás-osztás * / %<br>
+      összeadás-kivonás + -  egyváltozós előnövelés<br>
+       egyváltozós utónövelés ++ --<br>
+        zárójel ()<br>
+         tömbelem-hozzáférés [] a legelőször végrehajtott utasítás
+</p>
+
+<h3>Előnövelés és utónövelés</h3>
+<table>
+  <tr>
+    <td>egyváltozós előnövelés</td>
+    <td>++i;</td>
+  </tr>
+  <tr>
+    <td>egyváltozós utónövelés</td>
+    <td>i++;</td>
+  </tr>
+</table>
+
+<p>ha kifejezésként használja</p>
+<table>
+  <tr>
+    <td>println(i++);</td>
+    <td>először helyettesíti be a kifejezésbe, és csak utána növeli meg eggyel!, vagyis i-t ír ki, de a további kódban már i+1 az érték.</td>
+  </tr>
+  <tr>
+    <td>println(++i);</td>
+    <td>először megnöveli, és csak utána helyettesíti be a kifejezésbe, vagyis i+1-et ír ki</td>
+  </tr>
+</table>
+
+<p>például:<br>
+  ha int i=100;<br>
+  akkor j = i++ + ++i; az az gyakorlatilag j = 100 + 102; -nek felel meg!
+</p>
+
+<h3>feltételes hármas operátor:</h3>
+<p>
+   system.out.println( i % 2 == 0 ? "páros" : "páratlan" );  ezek egymásba ágyazhatók, de 
+  </p>
+
+<h3>összehasonlító operátorok</h3>
+<table>
+  <tr>
+    <td>==</td>
+    <td>teljes megegyezés</td>
+  </tr>
+  <tr>
+    <td>!=</td>
+    <td>eltérés</td>
+  </tr>
+  <tr>
+    <td><=</td>
+    <td>kisebb vagy egyenlő</td>
+  </tr>
+  <tr>
+    <td><</td>
+    <td>kisebb</td>
+  </tr>
+</table>
+
+<h3>if feltételes elágazás (control flow statement)</h3>
+<p>
+  if ( [boolean kifejezés] ) {   //ha csak egy utasítás követi, a kapcsos zárójel nem kötelező<br>
+  } else {<br>
+  }<br>
+  <br>
+  if ( [boolean kifejezés] ) {   //egymásba fűzött, három ágú if vezérlőszerkezet<br>
+  } else if () {<br>
+  } else {<br>
+  }<br>
+</p>
+
+<h3>switch feltételes elágazás</h3>
+
+<p>
+  int dayOfWeek = 3;<br>
+  <br>
+  switch (dayOfWeek) {<br>
+    case 1: System.out.println("Hétfő");<br>
+    case 2: System.out.println("Kedd");<br>
+    case 3: System.out.println("Szerda");<br>
+    case 4: System.out.println("Csütörtök");<br>
+    case 5: System.out.println("Péntek");<br>
+    case 6: System.out.println("Szombat");<br>
+    case 7: System.out.println("Vasárnap");<br>
+  };<br>
+  <br>
+  Falls through logic: a case 3 csak egy belépési pont, és onnantól fogva mindent végrehajt, a csütörtök, péntek, szombat, vasárnap is kiíratik.<br>
+  <br>
+  ezt a break utasítással lehet megakadályozni:<br>
+  <br>
+  switch (dayOfWeek) {<br>
+    case 1: System.out.println("Hétfő"); Break;<br>
+    case 2: System.out.println("Kedd"); Break;<br>
+    case 3: System.out.println("Szerda"); Break;<br>
+    case 4: System.out.println("Csütörtök"); Break;<br>
+    case 5: System.out.println("Péntek"); Break;<br>
+    case 6: System.out.println("Szombat"); Break;<br>
+    case 7: System.out.println("Vasárnap"); Break;<br>
+  };<br>
+  <br>
+  Ez a vezérlőszerkezet a C-ben is így működik.<br>
+  <br>
+  switch (dayOfWeek) {<br>
+    case 1: <br>
+    case 2: <br>
+    case 3: <br>
+    case 4: <br>
+    case 5: System.out.println("Hétköznap"); Break;<br>
+    case 6: <br>
+    case 7: System.out.println("Hétvége"); Break;<br>
+  };<br>
+  <br>
+  szerepelhet benne egy *default* ág is, amelyet akkor hajt végre, hogyha egyik esetre sem illik.<br>
+  <br>
+  <br>
+  értékadásra használva:   (csak a java v14-től használható! korábbi változatoknál "enable preview features" bekapcsolandó!)<br>
+  <br>
+  String nameOfDay = switch (dayOfWeek) {     ennél a fajtánál a default kötelező!<br>
+    case 1 -> "Hétfő";<br>
+    case 2 -> "Kedd";<br>
+    case 3 -> "Szerda";<br>
+    case 4 -> "Csütörtök";<br>
+    case 5 -> "Péntek";<br>
+    case 6 -> "Szombat";<br>
+    case 7 -> "Vasárnap";<br>
+    default -> { dayOfWeek = 0;<br>
+                 yield "nemtom";<br>
+               }<br>
+  };<br>
+  System.out.println(namOfDay);<br>
+  <br>
+  A -> token használható a fentebbi esetekben is, és akkor nincs szükség break-re, mert kizáró eseteket írnak le.<br>
+  A : tokenre viszont van fallsthrough logic.<br>
+</p>  
+</body>
+</html>

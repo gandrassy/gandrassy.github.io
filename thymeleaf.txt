@@ -1,0 +1,162 @@
+
+THYMELEAF
+=========
+
+Ez generálja a html-eket a template-kből.
+Fontos, hogy a weblap template így kezdődjön:
+
+<html lang="hu" xmlns:th="http://www.thymleaf.org">
+
+ha nincs benne ez a namespace tag, akkor nem működik.
+
+
+
+Egy statikus tartalom kicserélése dinamikus tartalomra:
+-------------------------------------------------------
+
+Vegyünk egy statikus tartalmat:
+
+<p>Losem ipsum... stb</p>
+
+Ha a html tagba beleírom, hogy:
+
+<p th:text="${blogbejegyzes}">Lorem ipsum... stb</p>
+
+a controllerbe meg hogy: model.add("blogbejegyzes","ma bal lábbal keltem");
+
+akkor a timeleaf kicseréli a paragrafust a "ma bal lábbal keltem" mondatra, ha mögötte van a backend.
+Ha nincs mögötte, mert mondjuk letöltötte a webdesigner a saját gépére, akkor az ő statikus html böngészőjében a Lorem ipsum... stb. jelenik meg, és tud vele dolgozni.
+
+
+Ha a text html kódokat is tartalmaz, akkor így kell definiálni:
+
+<p th:utext="${blogbejegyzes}">Lorem ipsum... stb</p>    <!-- u mint unescaped text -->
+
+
+Ugyanennek a mintájára kicserélhetünk linkeket is:
+--------------------------------------------------
+
+<link rel="stylesheet" th:href="@{../static/css/main.css}" href="css/main.css"/>
+<link rel="stylesheet" th:href="@{../styles.css}" href="../static/styles.css" />
+
+
+meg tudjuk változtatni a html tagek attributumait is:
+-----------------------------------------------------
+
+<img src="logo.gif" th:attr="width=#{kep.szelesseg}">
+
+
+Ha a változó egy objektum, akkor így érjük el az egyes mezőit:
+--------------------------------------------------------------
+
+  ${konyv.cime}, ${konyv.szerzo} stb.
+
+Ha nagyon sok mezője van, használhatunk un. kiválasztó kifejezést is így:
+                                            ---------------------
+  <div th:object="${konyv}">
+    <span th:text="*{cime}">...</span>
+    <span th:text="*{szerzo}">...</span>
+  </div>
+
+
+For-each
+========
+
+ha egy objektumlistát adunk át a modellnek:
+
+list<Konyv> konyvek = new Arraylist<>(); 
+
+akkor azt a view-ben be tudjuk járni:
+
+<th:block th:each="elem : ${konyvek}">
+  <tr>
+    <td th:text="${elem.szerzo}">ismeretlen szerző</td>
+    <td th:text="${elem.cime}">ismeretlen cím</td>
+    <td th:text="${elem.ara} + ' Kč'">ismeretlen ár</td>
+    <td th:text="${elem.raktaron}">ismeretlen db</td>
+  </tr>
+</th:block>
+
+
+Lehetőség van helyi változók definiálására is, pl:
+
+<div th:with="elsoKonyv=${konyvek[0]}">
+  <p> Az első könyv <span th:text="${elsoKonyv.cime}">Biblia</span>. </p>
+</div>
+
+
+fragment expression
+===================
+
+Hogyha vannak a honlapnak közös részei (pl. header, footer, menük stb.), akkor azt nem kell minden template-ben külön-külön definiálni. Egy view.html így nézhet ki:
+
+<body>
+    <header th:insert="fragments/toredekek.html :: header"> </header> 
+       <!-- injektálja a toredekek.html <header>...</header> részét -->
+    <div th:replace="fragments/toredekek.html :: div.another"> Lorem ipsum...stb </div>
+       <!-- kicseréli a Lorem ipsumot a toredekek.html <div class="another">...</div> részére -->
+    <div th:insert="fragments/toredekek.html :: footer"></div>
+       <!-- injektálja a toredekek.html <footer>...</footer> részét -->
+</body>
+
+
+A toredekek.html-ben így is meg lehet jelölni a blokkokat:
+
+<head th:fragment="headerfiles">
+  <link th:href="@{/css/styles.css}" rel="stylesheet">
+  <link th:href="@{/css/bootstrap.css}" rel="stylesheet">
+</head>
+
+és ezután a view-kban már így tud rá hivatkozni:
+
+<head>
+  <title>Az én lapom</title> 
+  <th:block th:include="fragments/toredekek.html :: headerfiles"></th:block>
+</head>
+
+
+A fragmenteknek paramétereket is át lehet adni:
+-----------------------------------------------
+
+<div th:fragment="formField (field, value, size)">
+  <label th:for="${#strings.toLowerCase(field)}"> <span th:text="${field}">Field</span> </label>
+  <input type="text" th:id="${#strings.toLowerCase(field)}" th:name="${#strings.toLowerCase(field)}"
+       th:value="${value}" th:size="${size}">
+</div>
+
+a view-ből így hívja meg:
+
+<div th:replace="toredekek.html :: formField(field='Name', value='John Doe', size='40')"> </div>
+
+
+A fragmentekre fel lehet írni feltételeket is, pl:
+--------------------------------------------------
+
+<div th:replace="${#lists.size(data) > 0} 
+     ? ~{toredekek.html :: dataPresent} 
+     : ~{toredekek.html :: noData}" > </div>
+
+
+feltétel nélkül az elvis operator azt ellenőrzi, definiált-e a változó vagy null?
+
+<div th:replace="${konyv.cime} 
+     ? ~{toredekek.html :: konyvkijelzo} 
+     : 'üres a címmező' " > </div>
+
+
+Az if-else szerkezet így néz ki a thymeleafban:
+
+<td>
+    <span th:if="${tanar.neme == 'F'}">Férfi</span>
+    <span th:unless="${tanar.neme == 'F'}">Nő</span>
+</td>
+
+
+Switch-case szerkezet is felírható:
+
+<td th:switch="${#szam}">
+    <span th:case="'0'">nulla</span>
+    <span th:case="'1'">egy</span>
+    <span th:case="'2'">kettő</span>
+    <span th:case="*">sok</span>       <!-- default option -->
+</td>

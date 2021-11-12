@@ -1,0 +1,43 @@
+﻿
+JAVA jegyzet
+
+
+
+github helyett bitbucket is használható 
+
+saját szerverre a gitlab nevű programot kell felinstallálni.
+
+
+
+JAVA
+====
+
+fejlesztő környezetek: Intellide, Eclypse, Netbeans
+
+project: java, sdk 1.8 (vagy ha nincs, add jdk), create from template, commandline app, névadás, 
+ base package - javaban a kódokat package-kbe szervezzük. Ezek neve a cég url-ével kezdődik. Pl. com.greenfoxacademy.elso_package.masodik_package stb.
+
+A kódon kívül egy csomó szirszart is cisnál a fejlesztő környezet, ezek egy git.ignore file-ba írhatóak, amely bármelyik mappába rakható, és onnantól
+lefele vonatkozik. Ha a repó gyökérbe rakod a file-t mondjuk *.exe-vel, akkor egy exe-t se, sehonnan se ad hozzá a stage-hez. De csak akkor nem, hogyha
+ a file a git.ignore létrehozása előtt nem volt stage-ra téve .
+
+/* több soros komment */
+// egy soros komment
+
+"System.out.println" bepötyögése helyett sout+enter
+
+
+Debugolás intellij-ben
+======================
+
+A kódba break pointokat kell rakni, aztán a kis bogárka ikonnal kell elindítani. A break pointnál megáll. A bal alsó sarokban van egy kis ablak. Abban lehet "step over" gombbal lépésről-lépésre menni. De ez csak a főprogramra vonatkozik, ha függvényt hív, akkor a "step in"-nel kell belemenni. 
+Bizonyos változó követéséhez a "watch is"-sal ki lehet emelni egy változót, amelyet akkor is kijelez, ha a kód éppen nem azzal dolgozik.
+
+
+Gyakorló feladatok találhatók itt:
+ leetcode.com
+ codewars.com
+ projecteuler.net
+ hackerrank.com
+
+

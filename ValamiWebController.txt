@@ -1,0 +1,97 @@
+﻿package com.gfa.exam.solution.touristinformation.controllers;
+
+import com.gfa.exam.solution.touristinformation.services.ValamiService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@Controller
+public class ValamiWebController {
+
+  @Autowired
+  ValamiService valamiService;
+
+  @GetMapping("/")
+  public String mainpage(Model suitcase) {
+    suitcase.addAttribute("valamik", valamiService.listAllValamis());
+    return "main";
+  }
+
+  @GetMapping("/edit/{id}")
+  public String editpage(@PathVariable Integer id, Model suitcase) {
+    suitcase.addAttribute("valamik", valamiService.listAllValamis());
+    suitcase.addAttribute("ezadolog",valamiService.getAttraction(id));
+    return "edit";
+  }
+
+  @PostMapping("/add")
+  public String addAttraction(@RequestParam String valamiName,
+                              @RequestParam String szoveg,
+                              Model suitcase) {
+    valamiService.addValami(valamiName,szoveg);
+    return "redirect:/";
+  }
+
+
+  @PostMapping("/edit/{id}")
+  public String modifyAttraction(@PathVariable Integer id,
+                                 @RequestParam String valamiName,
+                                 @RequestParam String szoveg,
+                                 Model suitcase) {
+    valamiService.editAttraction(id,valamiName,szoveg);
+    suitcase.addAttribute("valamik", valamiService.listAllValamis());
+    suitcase.addAttribute("ezadolog",valamiService.getAttraction(id));
+    return "edit";
+  }
+
+
+--- egyszerű átirányítás pathparaméterrel ---
+
+  @GetMapping("/nutrition")
+  public ModelAndView nutritionStore(@RequestParam(required = false) String name, ModelMap suitcase) {
+    if (name == null) { name = "karak"; }
+    suitcase.addAttribute("name", name);
+    return new ModelAndView("redirect:/information", model);
+  }
+
+  // aki meghívja a /nutrition végpontot, átkerül a /information?name=karak -ra
+
+
+--- stream kifejezések a basic webshopból ---
+
+    @RequestMapping("/search")
+    public String containsNike(@RequestParam String searchfor, Model model) {
+        initList();
+        model.addAttribute("items",storageList.stream()
+                .filter(e->( e.getDescription().toLowerCase().contains(searchfor.toLowerCase()) || e.getName().toLowerCase().contains(searchfor.toLowerCase())))
+                .collect(Collectors.toList()));
+        return "webshop";
+    }
+
+    @RequestMapping("/only-available")
+    public String onlyAvailable(Model model) {
+        initList();
+        model.addAttribute("items",storageList.stream()
+                .filter(e->e.getQuantityOfStock() != 0)
+                .collect(Collectors.toList()));
+        return "webshop";
+    }
+
+    @RequestMapping("/cheapest-first")
+    public String cheapestFirst(Model model) {
+        initList();
+        model.addAttribute("items",storageList.stream()
+                .sorted((e1, e2) -> Integer.compare(e1.getPrice(), e2.getPrice()))
+                .collect(Collectors.toList()));
+        return "webshop";
+    }
+
+--- basic webshop vége ---
+
+
+
+}

@@ -1,0 +1,18 @@
+
+Rajzolás
+========
+
+import javax.swing.*;
+graphics.setColor(Color.RED);   //színválasztás
+graphics.setColor(new Color(r,g,b));   //színválasztás 0-255 közötti számok
+graphics.drawLine(x1,y1,x2,y2); //vonal
+graphics.drawRect(x1,y1,x2,y2); //téglalap
+graphics.fillRect(x1,y1,x2,y2); //téglalap színnel kitöltve
+graphics.drawOval(x1,y1,x2,y2); //olvális, a koordináták a befoglaló téglalap sarkai
+
+
+Véletlenszám generálás
+======================
+
+Math.random();  // 0..1 közötti szám
+(int)(Math.random()*100);  //0-100 közötti szám

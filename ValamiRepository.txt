@@ -1,0 +1,42 @@
+﻿package com.gfa.exam.solution.touristinformation.repositories;
+
+import com.gfa.exam.solution.touristinformation.models.Valami;
+import org.springframework.data.repository.CrudRepository;
+
+public interface ValamiRepository extends CrudRepository<Valami, Integer> {
+
+  public List<Valami> findAll();
+
+// ehhez nem kell query annotáció! itt csak a visszatérési értéket írjuk felül.
+
+  @Query
+  public Valami findValamiByValamiName(String valamiName);  //megkeresi név alapján
+
+  @Query
+  public Valami findFirstByCategoryOrderByPriceDesc(String category); //csökkenő sorrend, tehát a legnagyobbat adja
+
+  @Query
+  public Valami findFirstByCategoryOrderByPriceAsc(String category);  //növekvő sorrend, tehát a legkisebbet adja
+
+
+// ha UnsatisfiedDependencyException: Error creating bean with name 'ValamiService' fordítási hibát ad
+// akkor rohadjon meg aki kitalálta, és írjuk fel native query-ként:
+
+  @Query(value="SELECT * FROM dinosaur WHERE actual>expected", nativeQuery = true)
+  List<Dinosaur> findAllOverpopulated();
+
+// ilyen esetben a függvény neve bármi lehet.
+
+
+
+// az eredmények betehetőek pojokba is, ez esetben a pojoknak megfelelő konstruktőrük kell legyen
+
+  @Query("SELECT new hu.nive.ujratervezes.kepesitovizsga.housecup.models.Winner(sum(h.pointsEarned), h.houseName) FROM HousePoints as h GROUP BY h.houseName")
+  List<Winner> listHouseCupWinners();
+
+  @Query("SELECT new hu.nive.ujratervezes.kepesitovizsga.housecup.models.Valedictorian(count(h.studentName), h.studentName) FROM HousePoints as h GROUP BY h.studentName")
+  List<Valedictorian> getValedictorian();
+
+// ezek a pojok nem @Entity taggeltek, csak közönséges objektumok
+
+}

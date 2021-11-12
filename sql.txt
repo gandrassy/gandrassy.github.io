@@ -1,0 +1,172 @@
+Structured Query Language
+-------------------------
+
+Adatbázis tárolja az Adattáblákat
+
+Adattábla egy logikai egységbe tartozó dolgokat tárol: pl. diákok, ebédmenük, termek stb.
+
+
+Relational Database Management System
+-------------------------------------
+
+Jellemzői: 
+  - az adattáblák utólag módosíthatóak, pl. új column-ok adhatóak hozzá.
+  - jogosultságokat kezel
+  - gyors hozzáférhetőség
+  - vannak megírt funkciók (pl. auto increment)
+  - platformfüggetlenek
+  - az adattáblák egymással kapcsolatban állnak!
+
+A rekordokat általában egyedi azonosítóval látják el, ez az UNIQUE, pl. személyi szám. 
+
+Speciális mezők
+---------------
+
+KULCS
+
+lehet
+  - egyszerű (egy unique)
+  - összetett (körzetszám + telefonszám)
+
+Egy táblában lehet "idegen kulcs is", ami az adott táblában nem kulcs, de egy másikban igen. 
+
+
+KAPCSOLÓMEZŐ
+
+egy olyan mező, amely mindkét táblában megtalálhatóak.
+
+A kapcsolat lehet:
+ - 1:1 tipusú, vagyis kölcsönös kapcsolat. Ezek akár egy táblában is tárolhatóak lennének. Pl. gépjárműnyilvántartás és a felelősségbiztosítások.
+
+ - 1:TÖBB típusú, vagyis alá-fölé rendelt kapcsolat. Az alárendelt táblában akár több érték is fűzhető a kapcsolómezőhöz. (pl. egy biztosítási kötvényhez több káresemény)
+hivatkozásintegritás:
+  1. a fölérendelt táblából nem törölhetünk vagy módodsíthatunk olyan kulcsot,
+     amelyhez tartozik rekord az alárendelt táblában.
+  2. az alárendelt táblában nem rögzíthetünk olyan adatot, amelyhez nincs kulcs a fölérendelt táblában
+
+ - TÖBB:TÖBB típusú. mindkét tábla egy-egy sorához a másik táblából több sor is kapcsolódhat, pl. újságok és előfizetőik. Ez esetben egy kapcsoló táblát kell közéjük tenni, amely egy kétkulcsos tábla lesz, tartalmazza az újsád unique-jét is meg az előfizető unique-jét is, de egy-egy pár csak egyszer szerepelhet benne.
+
+
+SQL lekérdezések (statement)
+----------------------------
+
+homokozó:
+https://www.w3schools.com/sql/trysql.asp?filename=trysql_select_all
+
+
+CRUD = create read update delete vagyis az adatbázis négy alapfunkciója. Ezek így működnek:
+
+
+SELECT * FROM Customers; = az összes adatot kérem a Customers táblából.
+SELECT CustomerName, ContactName FROM Customers; = csak a két oszlopot kérem le
+SELECT * FROM Customers where City='Berlin' or City='Nümberg'; = leszűri a németeket
+SELECT * FROM Customers where City='Berlin' and CustomerName LIKE 'Hans%'; = az összes berlini Hans akárki
+SELECT * FROM Customers where City='Berlin' and CustomerName LIKE '%Castorf'; = az összes berlini Castorf
+SELECT * FROM Customers where City='Berlin' and CustomerName LIKE '%ns Cas%'; = az összes berlini Hans Castorf
+SELECT * FROM Customers where City='Berlin' and CustomerName LIKE 'Hans C_storf'; = nem tudom, hogy a C után umlaut van-e vagy sima a, ezért azt az egy karaktert jokerezem
+
+
+
+Kérhetünk csak bizonyos mezőket is, pl:
+
+SELECT PostalCode FROM Customers WHERE ContactName = 'Hans Castorf';  = ez csak az irányítószámát adja meg
+
+SELECT PostalCode as 'irányítószám' FROM Customers WHERE ContactName = 'Hans Castorf';  = ez csak az irányítószámát adja meg, de nem PostalCode column name-mel, hanem irányítószám névvel
+
+
+SELECT DISTINCT Country FROM Customers where Country not null ORDER BY Country DESC LIMIT 3; = felsorolja a különböző városok listáját, de mindegyiket csak egyszer, a nullokat kihagyva, és végül betűrendbe rendezi, és csökkenő sorrendben (ASC a növekvő, de az a defaultja), de csak az első hármat
+
+SELECT * FROM Customers where Country IN('Germany', 'Austria', 'Lichteinstein'); = németül beszélő ügyfelek
+
+SELECT * FROM Customers where Country NOT IN('Germany', 'Austria', 'Lichteinstein'); = bárki, aki nem német
+
+
+SELECT COUNT(*) FROM Customers; = megszámolja a rekordokat
+
+SELECT COUNT(DISTINCT Country) FROM Customers; = megmondja, hogy hány féle országból regisztráltak
+
+
+SELECT * FROM Employees ORDER BY Birthday limit 1; = legidősebb ember megkeresése
+SELECT MIN(BirthDate) FROM Employees; = ez is!
+
+SELECT * FROM Employees where BirthDate BETWEEN '1969-01-01' AND '1979-01-01';
+
+SELECT * FROM Suppliers WHERE EXISTS(SELECT ProductName FROM Produts WHERE SupplierID=Suppliers.supplierID AND Price < 20); kilistázza az összes suppliert, akinek van huszasnál olcsóbb terméke
+
+új customer felvitele:
+
+INSERT INTO Customers (CustomerName, ContactName) VALUES ('Gyula Bt', 'Gyula');
+
+törélés:
+
+DELETE FROM Customers;  = minden adat törlése !!! itt már csak a backup segíthet.
+
+DELETE FROM Customers where CustomerID = 1;  csak az 1-as ügyfél törlése
+DELETE FROM Customers where CustomerName = 'Gyula';  Gyula törlése
+
+módosítás:
+
+UPDATE Customers SET CustomerName = 'Gyula Kft' where ContactName = 'Gyula';
+
+
+Két adattábla összekapcsolása
+-----------------------------
+
+Primary key: unique, customerID, salesmanID
+
+Ezek foreign key-ek lesznek az Orders táblában, aminek szintén van egy unique-ja, pl. a bizonylatszám.
+
+
+Descartes szorzat: 
+SELECT * FROM Orders, Customers, Salesmans; - minden létező változatot iterál!
+
+ezért úgy kell felírni, hogy csak azokat a foreign keyeket importálja, amelyek az Ordersben ténylegesen szerepelnek is:
+
+SELECT * FROM Orders, Customers, Salesmans WHERE Customers.CustomerID = Orders.CustomerID AND Orders.SalesmanID = Salesmans.SalesmanID;
+
+
+Ugyanez automatikusan is csinálható, ez az INNER JOIN
+
+SELECT * FROM Orders 
+  INNER JOIN Customers ON Orders.CustomerID=Customer.CustomerID
+  INNER JOIN Salesmans ON Orders.SalesmanID=Salesmans.SalesmanID;
+
+
+Ha minden ügyfelet látni akarok, azt is, aki nem rendelt:
+
+SELECT * FROM Orders 
+  LEFT JOIN Customers ON Orders.CustomerID=Customer.CustomerID;
+
+Ha minden salesmant látni akarok, azt is, aki nem szolgált ki senkit:
+
+SELECT * FROM Orders 
+  RIGHT JOIN Salesmans ON Orders.SalesmanID=Salesmans.SalesmanID;
+
+
+Ha mindent látni akarunk, akkor meg:
+
+SELECT * FROM Orders 
+  FULL OUTER JOIN Customers ON Orders.CustomerID=Customer.CustomerID;
+
+
+Unió
+----
+
+SELECT City FROM Customers UNION SELECT City FROM Suppliers; 
+  kilistázza az összes országot, ahol customer vagy supplier van.
+
+SELECT * FROM Customers GROUP BY Country; 
+  csoportosítja a vevőket országok szerint
+
+
+Összetett lekérdezések:
+
+SELECT query1.nev FROM 
+(SELECT h.student_name as nev, count(h.student_name) as szam FROM house_points as h 
+GROUP BY student_name ORDER BY szam DESC LIMIT 1) query1;
+
+  készít egy táblázatot a house_points táblázat adataiból, amelyben az szerepel, hogy adott
+  student.name hány bejegyzésben szerepel, ezt csökkenő sorba rendezi a bejegyzésszám alapján, és 
+  lelimitálja az első sorra, ezt nevezi query1-nek. Ebből aztán kiválasztja csak a nev mezőt. Így
+  végül azt a nevet kapjuk vissza eredményül, aki a legtöbb bejegyzésben szerepel.
+

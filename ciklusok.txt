@@ -1,0 +1,49 @@
+﻿Ciklusok
+========
+
+  for (int i=0; i<5; i++) {        először inicializálódik: int i=0; ez csak egyszer fut le
+  }                                utána teszteli a kilépési feltételt, ha false, akkor nem futtat le semmit
+                                   utána lefut a ciklus magjában lévő utasításblokk
+                                   ekkor értékelődik ki a harmadik kifejezés: i++, és teszteli a kilépési feltételt stb.
+
+  String[] names = { "Elek", "Mihaly", "Margit" };     FOR-EACH ciklus
+  for (String nev : names) {       a forciklus a fenti tömb értékeit veszi fel addig, amely minden sorra nem kerül.  
+    println(nev);
+  }
+
+
+  int i=10;
+  while (i<13) {                   előltesztelő ciklus: ha a feltétel true, végrehajtja. Lehet, hogy egyszer sem fut le.
+     i++;
+  }
+
+  i=1;                             először végrehajt mindent, utána nézi a feltételt, hogy megismételje-?
+  do {
+     i++;
+  } while (i<13);
+
+
+A ciklusoknál van még két parancs:
+
+break - kiugrik a ciklusból
+continue - a ciklus egy futását kihagyja
+
+Ezeket általában felhasználói interakciók kezelésére használjuk.
+
+i = 0;
+do {
+  i++;
+  if i=5 { break; } 
+ } while i<=20
+
+ötnél kiugrik
+
+i = 0;
+do {
+  i++;
+  if (i % 2 != 0) { continue; } 
+  sout(i)
+ } while i<=20;
+
+csak a páros számokat írja ki
+
