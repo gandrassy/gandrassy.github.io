@@ -1,0 +1,70 @@
+A git használata
+================
+
+letölthetõ innen: https://git-scm.com/
+
+komponensei: - windows explorer integráció
+             - git BASH (egy linux jellegû parancssoros felület)
+             - git GUI (grafikus felület)
+             - LFS (large file support)
+
+telepítés után be kell jelentkezni: git config--global user.email "andrassy@mensa.hu"
+                                    git config--global user.name  "Andrássy Gábor"
+
+egy meglévõ repository klónozása saját gépre: git clone https://github.com... stb.
+(ezt a parancsot a repository számára nyitott könyvtárból adjuk ki)
+
+a file-ok különbözõ állapotai:
+  - untracked  (ez az alapállapot, ki kell jelölni mentendõnek)
+  - staged     (a fileok mentésre elõkészítve)
+  - unmodified (a commitolt file-ok állapota mindaddig, amíg hozzájuk nem szerkesztenek)
+  - modified   (mentéshez ismét stageddé kell tenni)
+
+gyakorlatban:
+
+az összes file kijelölése mentésre:  git add .
+az elõkészített file-ok mentése:     git commit -m "this is the very first version of mine"
+a file-ok állapotának lekérdezése:   git status ("working tree clean" válasz azt jelenti, sikeres)
+
+a felesleges commitok eltávolíthatóak a git rebase paranccsal
+
+
+Szinkronizálás a távoli repositoryval
+-------------------------------------
+
+megnézi, hogy az adott repositoryban mely file-okon dolgoznak mások: git fetch
+ez a local repot nem módosítja, csak a git checkout parancsal lehet megnézni,
+mi változna, ha lefrissítenéd a local repot, és a git merge parancsal összefésülni.
+
+a local repo frissítése:        git pull (ezt minden push elõtt elindítani!)
+
+saját módosítások feltöltése:   git push
+
+
+code review
+-----------
+
+1. a központi repót forkolom, és klónozom a saját gépemre
+
+2. csinálok egy új branchet annak, amit hozzáfejlesztenék:
+
+     git checkout -b some-feature
+
+     [elkészítem a kódot]
+
+     git commit -a -m "Add first draft of some feature"
+
+3. amikor kész, feltöltöm a saját github repository-mba:
+
+     git push origin some-branch
+
+4. a githubon a saját forked repóból csinálok egy pull requestet
+
+     a source branch az a saját branchem, a some-feature,
+     a destination branch a a senior develpoer saját repójában a main
+
+5. a senior beletenyerel a merge gombba, és ezzel bekerül a fõsodorba.
+
+bõvebben: https://www.atlassian.com/git/tutorials/learn-git-with-bitbucket-cloud
+
+
