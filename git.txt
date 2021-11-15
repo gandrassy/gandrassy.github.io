@@ -1,70 +1,70 @@
-A git használata
+ï»¿A git hasznÃ¡lata
 ================
 
-letölthetõ innen: https://git-scm.com/
+letÃ¶lthetÅ‘ innen: https://git-scm.com/
 
-komponensei: - windows explorer integráció
-             - git BASH (egy linux jellegû parancssoros felület)
-             - git GUI (grafikus felület)
+komponensei: - windows explorer integrÃ¡ciÃ³
+             - git BASH (egy linux jellegÅ± parancssoros felÃ¼let)
+             - git GUI (grafikus felÃ¼let)
              - LFS (large file support)
 
-telepítés után be kell jelentkezni: git config--global user.email "andrassy@mensa.hu"
-                                    git config--global user.name  "Andrássy Gábor"
+telepÃ­tÃ©s utÃ¡n be kell jelentkezni: git config--global user.email "andrassy@mensa.hu"
+                                    git config--global user.name  "AndrÃ¡ssy GÃ¡bor"
 
-egy meglévõ repository klónozása saját gépre: git clone https://github.com... stb.
-(ezt a parancsot a repository számára nyitott könyvtárból adjuk ki)
+egy meglÃ©vÅ‘ repository klÃ³nozÃ¡sa sajÃ¡t gÃ©pre: git clone https://github.com... stb.
+(ezt a parancsot a repository szÃ¡mÃ¡ra nyitott kÃ¶nyvtÃ¡rbÃ³l adjuk ki)
 
-a file-ok különbözõ állapotai:
-  - untracked  (ez az alapállapot, ki kell jelölni mentendõnek)
-  - staged     (a fileok mentésre elõkészítve)
-  - unmodified (a commitolt file-ok állapota mindaddig, amíg hozzájuk nem szerkesztenek)
-  - modified   (mentéshez ismét stageddé kell tenni)
+a file-ok kÃ¼lÃ¶nbÃ¶zÅ‘ Ã¡llapotai:
+  - untracked  (ez az alapÃ¡llapot, ki kell jelÃ¶lni mentendÅ‘nek)
+  - staged     (a fileok mentÃ©sre elÅ‘kÃ©szÃ­tve)
+  - unmodified (a commitolt file-ok Ã¡llapota mindaddig, amÃ­g hozzÃ¡juk nem szerkesztenek)
+  - modified   (mentÃ©shez ismÃ©t stageddÃ© kell tenni)
 
 gyakorlatban:
 
-az összes file kijelölése mentésre:  git add .
-az elõkészített file-ok mentése:     git commit -m "this is the very first version of mine"
-a file-ok állapotának lekérdezése:   git status ("working tree clean" válasz azt jelenti, sikeres)
+az Ã¶sszes file kijelÃ¶lÃ©se mentÃ©sre:  git add .
+az elÅ‘kÃ©szÃ­tett file-ok mentÃ©se:     git commit -m "this is the very first version of mine"
+a file-ok Ã¡llapotÃ¡nak lekÃ©rdezÃ©se:   git status ("working tree clean" vÃ¡lasz azt jelenti, sikeres)
 
-a felesleges commitok eltávolíthatóak a git rebase paranccsal
+a felesleges commitok eltÃ¡volÃ­thatÃ³ak a git rebase paranccsal
 
 
-Szinkronizálás a távoli repositoryval
+SzinkronizÃ¡lÃ¡s a tÃ¡voli repositoryval
 -------------------------------------
 
-megnézi, hogy az adott repositoryban mely file-okon dolgoznak mások: git fetch
-ez a local repot nem módosítja, csak a git checkout parancsal lehet megnézni,
-mi változna, ha lefrissítenéd a local repot, és a git merge parancsal összefésülni.
+megnÃ©zi, hogy az adott repositoryban mely file-okon dolgoznak mÃ¡sok: git fetch
+ez a local repot nem mÃ³dosÃ­tja, csak a git checkout parancsal lehet megnÃ©zni,
+mi vÃ¡ltozna, ha lefrissÃ­tenÃ©d a local repot, Ã©s a git merge parancsal Ã¶sszefÃ©sÃ¼lni.
 
-a local repo frissítése:        git pull (ezt minden push elõtt elindítani!)
+a local repo frissÃ­tÃ©se:        git pull (ezt minden push elÅ‘tt elindÃ­tani!)
 
-saját módosítások feltöltése:   git push
+sajÃ¡t mÃ³dosÃ­tÃ¡sok feltÃ¶ltÃ©se:   git push
 
 
 code review
 -----------
 
-1. a központi repót forkolom, és klónozom a saját gépemre
+1. a kÃ¶zponti repÃ³t forkolom, Ã©s klÃ³nozom a sajÃ¡t gÃ©pemre
 
-2. csinálok egy új branchet annak, amit hozzáfejlesztenék:
+2. csinÃ¡lok egy Ãºj branchet annak, amit hozzÃ¡fejlesztenÃ©k:
 
      git checkout -b some-feature
 
-     [elkészítem a kódot]
+     [elkÃ©szÃ­tem a kÃ³dot]
 
      git commit -a -m "Add first draft of some feature"
 
-3. amikor kész, feltöltöm a saját github repository-mba:
+3. amikor kÃ©sz, feltÃ¶ltÃ¶m a sajÃ¡t github repository-mba:
 
      git push origin some-branch
 
-4. a githubon a saját forked repóból csinálok egy pull requestet
+4. a githubon a sajÃ¡t forked repÃ³bÃ³l csinÃ¡lok egy pull requestet
 
-     a source branch az a saját branchem, a some-feature,
-     a destination branch a a senior develpoer saját repójában a main
+     a source branch az a sajÃ¡t branchem, a some-feature,
+     a destination branch a a senior develpoer sajÃ¡t repÃ³jÃ¡ban a main
 
-5. a senior beletenyerel a merge gombba, és ezzel bekerül a fõsodorba.
+5. a senior beletenyerel a merge gombba, Ã©s ezzel bekerÃ¼l a fÅ‘sodorba.
 
-bõvebben: https://www.atlassian.com/git/tutorials/learn-git-with-bitbucket-cloud
+bÅ‘vebben: https://www.atlassian.com/git/tutorials/learn-git-with-bitbucket-cloud
 
 
