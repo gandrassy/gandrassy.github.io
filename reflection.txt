@@ -1,0 +1,127 @@
+Reflection
+==========
+
+Lassú! Ha lehet, kerüljük el.
+
+
+1. Class objektumok kinyerése (java.lang.Class)
+
+ java.lang.reflect classoknak (a java.lang.reflect.ReflectPermission kivételével) nincs public constructor-e. 
+
+ 
+ a)  ha van egy objektum példány, visszanyerhetjük az osztályát így:
+ 
+     Class c = myInstance.getClass();       // c = MyInstance
+ 
+     mivel a tömbök is objektumok, arra is felírható:
+ 
+     byte[] bytes = new byte[1024];
+     Class c = bytes.getClass();
+ 
+     A getClass() mindig a példányosított classt adja vissza, pl ha egy interface classt használunk, hogy 
+     Set<String> mySet = new HashSet<String>(); akkor a mySet.getClass() a HashSet-et adja vissza.
+     
+     a primitíveknek és voidoknak van egy wrapper classa, ez boxingolja a primitíveket referencia típussá.
+     minden ilyen wrappernek van egy TYPE nevű propertyje, amely uaz mint a primitív osztálya
+   
+     Class c = Double.TYPE    // c = double.class
+     Class c = Void.TYPE      // c = void.class
+     
+     
+ b)  ha nincs példány, de ismerjük a classt, akkor
+     
+     referencia típusnál:
+     
+     Class c = java.io.PrintStream.class;        // c = java.io.PrintStream
+     
+     Class c = int[][][].class;                  // int tipusú többdimenziós tömbök
+
+     primitív típusnál:
+     
+     Class c = boolean.class;                    // c = boolean
+          
+
+2. Class.forName()
+
+   primitív típusokra nem használható.
+   
+   Class c = Class.forName("com.mine.MyClass");  // ez az utasítás készít egy classt ezzel a névvel
+   
+   Class cDoubleArray = Class.forName("[D");     // tömb: double[].class
+
+   Class cStringArray = Class.forName("[[Ljava.lang.String;"); //két dimenziós tömb: String[][].class
+   
+   (A tömbök nevére vonatkozó szintaxis a Class.getName() metódusnál van leírva.)
+ 
+
+3 műveletek a classokon
+
+     Ha egy class szuperjét keressük, akkor 
+     
+     Class c= MyClass.getSuperClass();   használandó.
+     
+     Hogyha több interface-t is implementál, akkor 
+     
+     Class<?>[] classes = MyClass.getClasses();
+     
+     aztán lekérhetjük az összes, az  deklarált osztályokat is:
+     
+     Class<?>[] classes = MyClass.getDeclaredClasses();
+        
+
+4. Anonymous class declaration
+
+    a System classban van egy inner class, az out. Ezt így nyerjük ki:
+
+    import java.lang.reflect.Field;
+
+    Field f = System.class.getField("out");
+    Class c = f.getDeclaringClass();                 // c = System
+
+    
+    másik eset:
+    
+    public class MyClass {
+      static Object o = new Object() { public void m() {} };
+      static Class<c> = o.getClass().getEnclosingClass();
+    }
+
+    o.getDeclaredClass()  == null
+    Class.getEnclosingClass() == MyClass
+    
+    
+5. class access modifierek kinyerése
+
+    Class c = Class.forName("com.mine.MyClass");
+    
+    String name = c.getCanonicalName();                        // osztály neve
+    String mod =  Modifier.toString(c.getModifiers());         // modifierek: public abstract interface
+    TypeVariable[] typeVariableArray = c.getTypeParameters();  // type parameters, getName() hívandó az elemein
+    Type[] intfs = c.getGenericInterfaces();                   // interfaces implemented
+    List<Class> l = new ArrayList<Class>();
+	printAncestor(c, l);                                       // inheritance path
+	Annotation[] annotations = c.getAnnotations();             // annotációk
+	
+	
+6. a class member-einek megkeresése:
+
+   a ___ helyén lehet "Field" "Method" és "Constructor" is (nota bene: a constructor persze nem öröklődik)
+
+   +-----------------------------------------+    +----------------------------------------+
+   |       visszatér: egy objektummal        |    |    visszatér: objektumok listájával    |
+   +---------------------+---------+---------+    +--------------------+---------+---------+
+   | Class API           | örökölt | private |    | Class API          | örökölt | private |
+   +---------------------+---------+---------+    +--------------------+---------+---------+
+   | getDeclared___("")  |   nem   |  igen   |    | getDeclared___s()  |   nem   |  igen   |
+   | get___("")          |  igen   |   nem   |    | get___s()          |  igen   |   nem   |
+   +---------------------+---------+---------+    +--------------------+---------+---------+
+
+   
+   Class<?> c = Class.forName("com.mine.MyClass");  // generikust használ, hogy ne kapjon fordításkor
+   Package p = c.getPackage();                      // ClassWarning.java uses unchecked or unsafe operations-t
+   c.getFields()
+   c.getMethods()
+   c.getConstructors()
+   
+   
+   egyéb hibaelhárítás: https://docs.oracle.com/javase/tutorial/reflect/class/classTrouble.html
