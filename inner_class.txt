@@ -1,0 +1,80 @@
+
+Inner classok
+=============
+
+Minden inner class egy-egy új objektum, ezért használatával óvatosan.
+
+Inner classt akkor csinálunk,ha implementalni kell egy interface-t vagy abstract osztályt,
+de nem akarunk csak ezért létrehozni egy osztályt.
+
+
+Az inner class két fajtája az anonymous inner class, amely egy változó deklarációban 
+vagy  függvényhívásban van definiálva:
+
+--- Jarmu.java ---
+
+public abstract class Jarmu {
+    String rendszam;
+    public getRendszam;
+    public setRendszam;
+    stb.
+  }
+
+--- Main.java anonymous inner classal ---
+
+public class Main{
+
+  public static void main(String[] args) {
+    int numerikusValtozo = 1;
+    display(new Jarmu() { @Override 
+                          public void setRendszam(String rendszam) {
+                             this.rendszam=rendszam;
+                          } 
+  }
+
+}
+
+Az anonymous inner classt fordításkor elnevezi a javac valahogy mint Main$1. 
+generál neki egy konstruktõrt is, amelyen van egy this field, mely az út deklaráló 
+classra mutat.
+Ugyanilyen módon adja át numerikusValtozo értékét is, amely az inner class egy
+fieldjeként megjelenik, és onnan lekérhetõ - de csak akkor, hogyha a deklaráló
+class kódja nem változtat az értékén. Hogyha változtat, akkor fordítási hibát ad, mert 
+az átadás érték szerinti, így tehát az inner classban a deklaráció pillanatában lévõ érték
+marad, s nem a mindenkori. Objektumokra is igaz.
+
+--- Main Java nevesített inner classal ---
+
+public class Main{
+
+  public static void main(String[] args) {
+    display(new MyJarmu("FCP-462")); 
+  }
+
+  public class MyJarmu implements Jarmu {
+    public MyJarmu(String rendszam) {
+      this.rendszam=rendszam;
+    }
+  }
+
+}
+
+--- Main Java változóban deklarált inner classal ---
+
+public class Main{
+
+  public static void main(String[] args) {
+    display(new MyJarmu("FCP-462")); 
+  }
+
+  public Jarmu myJarmu = new Jarmu {
+    public MyJarmu(String rendszam) {
+      this.rendszam=rendszam;
+    }
+  }
+
+}
+
+A nevesített innerclassal hasonló a helyzet, mint az anonymoussal, azzal a különbséggel, 
+hogyha ezek static classok, akkor nem kaptják meg a deklaráló class impilicit referenciáját. 
+

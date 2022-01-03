@@ -55,32 +55,6 @@ System.out.println( elsoOregAllat(allatok).orElse(null) );
 
 
 
-Inner classok
-=============
-
-Csak akkor használjuk, ha nagyon muszáj!
-
-
-public class Main{
-
-  public class Jarmu {
-    String rendszam;
-    public getRendszam;
-    public setRendszam;
-    stb.
-  }
-
-  public static void main(String[] args) {
-    Jarmu szallito = new Jarmu("CMJ-229");
-  }
-
-}
-
-
-Anonimus innerclasst csinálunk,ha implementalni kell egy interface-t vagy abstract osztályt, de nem akarunk csak ezért létrehozni egy osztályt.
-
-
-
 Lambda expression ->
 ====================
 

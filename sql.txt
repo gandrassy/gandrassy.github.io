@@ -170,3 +170,38 @@ GROUP BY student_name ORDER BY szam DESC LIMIT 1) query1;
   lelimitálja az első sorra, ezt nevezi query1-nek. Ebből aztán kiválasztja csak a nev mezőt. Így
   végül azt a nevet kapjuk vissza eredményül, aki a legtöbb bejegyzésben szerepel.
 
+
+Prepare Statement:
+
+Lényege, hogy a selectet és a paramétereket külön csomagban adjuk át a servernek.
+Előnye, hogy így a select bekerül egy statement cache-ba, így nem kell mindig újra fordítani
+és újabb és újatt query plant csinálni hozzá. További előnye, hogy a paraméterként átadott stringeket ki escape-eli, így nem lehet sql injection támadást indítani a kiszolgáló ellen.
+
+pl:
+
+első csomag: SELECT id FROM users WHERE login=? AND password=?;     (ez bekerül a cache-ba)
+második csomag: 'superuser' 'superuserjelszo'                       (ezt behelyettesíti)
+
+
+(SQL injection támadás példa:
+
+  username-ként megadja: '; drob database xyz; --
+
+  behelyettesítve lesz belőle egy ilyen SQL parancssor:
+     SELECT id FROM users WHERE login = '';
+     DROP DATABASE;
+     --' AND password='';      (a -- a komment jele, tehát ezzel nem törődik a serves)
+
+  és az adatbázis törlődött is mindenestül!
+
+vagy
+
+  username-ként megadja: ' OR 1=1 LIMIT 1; --
+
+  behelyettesítve lesz belőle egy ilyen SQL parancssor:
+     SELECT id FROM users WHERE login = '' OR 1=1 limit=1;
+     --' AND password='';      (a -- a komment jele, tehát ezzel nem törődik a serves)
+
+  és a rendszer beléptette a támadót az elsőként regisztrált user (általában a szuperuser) nevében!
+
+)

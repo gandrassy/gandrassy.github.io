@@ -48,6 +48,10 @@ Egy példány készítése a main-ban:
   tamas.introduce();
 
 
+Érdekesség: a példányosítás csak az adatstruktúrákra vonatkozik, a metódusok csak egy példányban léteznek a java gépben, és amikor egy példány hívja meg őket, akkor a "this" fieldben kapják meg a
+vonatkozó objektumpéldány memóriacímét, amelynek az adataival dolgozniuk kell. 
+
+
 Constructor
 ===========
 
