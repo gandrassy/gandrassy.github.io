@@ -1,15 +1,15 @@
-
+ï»¿
 Inner classok
 =============
 
-Minden inner class egy-egy új objektum, ezért használatával óvatosan.
+Minden inner class egy-egy Ãºj objektum, ezÃ©rt hasznÃ¡latÃ¡val Ã³vatosan.
 
-Inner classt akkor csinálunk,ha implementalni kell egy interface-t vagy abstract osztályt,
-de nem akarunk csak ezért létrehozni egy osztályt.
+Inner classt akkor csinÃ¡lunk,ha implementalni kell egy interface-t vagy abstract osztÃ¡lyt,
+de nem akarunk csak ezÃ©rt lÃ©trehozni egy osztÃ¡lyt.
 
 
-Az inner class két fajtája az anonymous inner class, amely egy változó deklarációban 
-vagy  függvényhívásban van definiálva:
+Az inner class kÃ©t fajtÃ¡ja az anonymous inner class, amely egy vÃ¡ltozÃ³ deklarÃ¡ciÃ³ban 
+vagy  fÃ¼ggvÃ©nyhÃ­vÃ¡sban van definiÃ¡lva:
 
 --- Jarmu.java ---
 
@@ -34,16 +34,16 @@ public class Main{
 
 }
 
-Az anonymous inner classt fordításkor elnevezi a javac valahogy mint Main$1. 
-generál neki egy konstruktõrt is, amelyen van egy this field, mely az út deklaráló 
+Az anonymous inner classt fordÃ­tÃ¡skor elnevezi a javac valahogy mint Main$1. 
+generÃ¡l neki egy konstruktÅ‘rt is, amelyen van egy this field, mely az Ãºt deklarÃ¡lÃ³ 
 classra mutat.
-Ugyanilyen módon adja át numerikusValtozo értékét is, amely az inner class egy
-fieldjeként megjelenik, és onnan lekérhetõ - de csak akkor, hogyha a deklaráló
-class kódja nem változtat az értékén. Hogyha változtat, akkor fordítási hibát ad, mert 
-az átadás érték szerinti, így tehát az inner classban a deklaráció pillanatában lévõ érték
+Ugyanilyen mÃ³don adja Ã¡t numerikusValtozo Ã©rtÃ©kÃ©t is, amely az inner class egy
+fieldjekÃ©nt megjelenik, Ã©s onnan lekÃ©rhetÅ‘ - de csak akkor, hogyha a deklarÃ¡lÃ³
+class kÃ³dja nem vÃ¡ltoztat az Ã©rtÃ©kÃ©n. Hogyha vÃ¡ltoztat, akkor fordÃ­tÃ¡si hibÃ¡t ad, mert 
+az Ã¡tadÃ¡s Ã©rtÃ©k szerinti, Ã­gy tehÃ¡t az inner classban a deklarÃ¡ciÃ³ pillanatÃ¡ban lÃ©vÅ‘ Ã©rtÃ©k
 marad, s nem a mindenkori. Objektumokra is igaz.
 
---- Main Java nevesített inner classal ---
+--- Main Java nevesÃ­tett inner classal ---
 
 public class Main{
 
@@ -59,7 +59,7 @@ public class Main{
 
 }
 
---- Main Java változóban deklarált inner classal ---
+--- Main Java vÃ¡ltozÃ³ban deklarÃ¡lt inner classal ---
 
 public class Main{
 
@@ -75,6 +75,6 @@ public class Main{
 
 }
 
-A nevesített innerclassal hasonló a helyzet, mint az anonymoussal, azzal a különbséggel, 
-hogyha ezek static classok, akkor nem kaptják meg a deklaráló class impilicit referenciáját. 
+A nevesÃ­tett innerclassal hasonlÃ³ a helyzet, mint az anonymoussal, azzal a kÃ¼lÃ¶nbsÃ©ggel, 
+hogyha ezek static classok, akkor nem kaptjÃ¡k meg a deklarÃ¡lÃ³ class impilicit referenciÃ¡jÃ¡t. 
 
