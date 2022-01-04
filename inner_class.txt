@@ -2,11 +2,11 @@
 Inner classok
 =============
 
-Minden inner class egy-egy új objektum, ezért használatával óvatosan.
-
 Inner classt akkor csinálunk,ha implementalni kell egy interface-t vagy abstract osztályt,
-de nem akarunk csak ezért létrehozni egy osztályt.
+de nem akarunk csak ezért létrehozni egy új file-t, mert úgyis csak az adott classban van az alosztályra szükség. Az inner vlassok serializációjánál kompatibilitási gondok lehetnek, ezért serializálható objektumoknál jobb kerülni őket.
 
+Ha az inner class statikus, akkor nested classnak hívják, hogyha egy metódusban van definiálva,
+akkor meg local classnak. A local classok nem statikusak.
 
 Az inner class két fajtája az anonymous inner class, amely egy változó deklarációban 
 vagy  függvényhívásban van definiálva:

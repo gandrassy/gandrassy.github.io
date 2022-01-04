@@ -1,0 +1,43 @@
+Annotációk
+
+- vezérelhetik a compilert
+- vagy tartalmazhatnak futásidej� adatokat
+
+An annotációk a deklarációkban használatosak: osztályok, változók, metódusok esetében.
+
+Előre definiált annotációk:
+@Deprecated      - elavult kódrészlet, amelyet cserélni kell. a compiler warning-ot generál
+@Override        - a superclass metódusának felülírása
+@SupressWarnings - kéri, hogy a compiler ne generáljon warningot
+@SafeVarargs
+@FunctionalInterface
+
+@Nonnull - ha ez az annotáció rajta van valamin, és a compiler olyan kódrészletet lát, aminek
+           eredményeképp null lehet, akkor warningot dob.
+
+Az annotációk annotációi:
+@Retention  - hogy legyen az annotáció tartalma tárolva
+               SOURCE:   csak a forrásban, mint egy komment
+               CLASS:    fordítást vezérlő annotáció
+               RUMNTIME: futás közben is elérhető, pl. atrido metadata
+@Documented - ez az annotáció ahhoz kell, hogy megjelenjen a javadoc-ban
+@Target     - hogy az annotáció mire alkalmazható: annotációra, osztályra, konstruktőrre stb.
+@Inherited  - az annotációk a szuperclasstól öröklődjenek (alapból nem öröklődnek)
+@Repetable  - többször is megismételhetővé teszi az annotációkat
+
+Saját annotáció létrehozása:
+
+@Documented
+@interface MyAnnotation {
+   String name();
+   int serialNumber() default 1;
+   String lastModified() default "N/A";
+   String[] reviewers();
+}
+
+
+használata: 
+
+@MyAnnotation( name="John Doe", serialNumber=2, reviewers={"Alice", "Bob"} )
+public void someMethod() { }
+

@@ -66,6 +66,10 @@ numerikus
   d / c   osztás
   d % c   az osztás maradékát adja meg (két egész szám osztásának minfig 0 1 2 vagy 3 a maradéka)
 
+  d << c  bitshift: szorozza 2^c-vel. Ez a fenti szorzásnál gyorsabb művelet, de kockázatos.
+          pl. ha d = 43 akkor annak a bitképe:      000101011
+              ha c = 3 akkor d bitképe így módosul: 101011000 vagyis a végeredmény 344 lesz
+
 logikai
 -------
   b1 && b2  AND

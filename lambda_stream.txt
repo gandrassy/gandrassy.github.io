@@ -128,6 +128,10 @@ public class TryLambda {
 
 }
 
+A lambda kifejezések használata új objektumokat hoz létre. Ha a lambda kontextusfüggő, akkor
+mindenképpen, hogyha nem kontextus függő, akkor elvileg a javagép escape analisys által 
+újrahasznosítja, de ez még nem ellenőrzött, hogy mennyire működőképes.
+
 
 
 Java Stream API

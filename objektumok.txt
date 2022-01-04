@@ -287,6 +287,31 @@ Léteznek un. jelölő interface-ek (pl. Serializable) amelyekhez nem kell imple
                                            +---- csomagokra bontható, és máshova továbbítható
 
 
+Inicializálás
+=============
+
+Előfordulhat, hogy az objektumok létrehozásakor le kell futtatni egy kódot, például értékadás
+valamilyen kollekciónak. Ez a következőképp lehetséges:
+
+public class MyClass {
+
+  public static Hashmap<String, String> MY_MAP;
+
+  static {
+     MY_MAP.put("Monday", "Hétfő");
+     MY_MAP.put("Tuesday", "Kedd");
+     stb.
+  }
+
+}
+
+Ilyen statikus blokk több is lehet egy classban, és mindig a forráskód beli sorrendjükben hajtatnak végre.
+
+Példányváltozók is inicializálhatók ugyane módon, persze akkor a static kulcsszó elhagyandó az inicializáló blokk elől.
+
+Hogyha az objektum újrainicializálására is lehet számítani, akkor metódust kell rá írni.
+
+
 Package
 =======
 
