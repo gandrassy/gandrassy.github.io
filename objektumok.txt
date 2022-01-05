@@ -217,7 +217,6 @@ de ezt sokkal nehezebb implementálni. pl. ha több azonos nevű osztály is van
 
 
 
-
 Absztakt osztályok
 ==================
 
@@ -225,7 +224,8 @@ Absztakt osztályok
   public abstract class Allatok { 
   }
 
-Az absztrakt osztályok nem példányosíthatóak, de közös kódrészleteket biztosítanak a gyerekeiknek.
+Az absztrakt osztályok nem példányosíthatóak, de közös kódrészleteket biztosítanak a gyerekeiknek,
+valamint dinamikus változókat.
 
 A szülő konstruktőrét a super kulcsszóval hívja meg:
 
@@ -239,11 +239,14 @@ Ha egy szülői függvényt felülír, abból az eredeti szintén úgy hívható
 Interface-k
 ===========
 
-Az interface-ban nem lehet kódot írni, ott csak deklarálja a metódusokat.
+Az interface-ban nem lehet kódot írni, ott csak deklarálja a metódusokat és esetleg konstansokat.
+
+Minden field automatikusan public static final, minden metódus public.
 
   public interface Haziallat {
-    public void labhozBujik();
-    public void simogathato(); 
+    int mohacsivesz = 1526;
+    void labhozBujik();
+    void simogathato(); 
     stb.
   }
 
@@ -261,9 +264,18 @@ A hozzájuk tartozó kódokat a példányosítható osztály tartalmazza:
 
 KÖTELEZŐ overrideolni MINDENT ami az interface-ban deklarálva van!
 (A kód persze lehet üres, lényeg, hogy létezzen a metódus.)
+Éppen ezért az interfészkeket nem érdemes módosítani. Ha mégis kiegészítésre szorulnak,
+akkor vagy extendáljuk egy másik interfésszel, vagy több interfészket implementálunk (egy
+class több interface-t is implementálhat, vesszővel sorolhatjuk őket egymás után), 
+vagy a később hozzáadott metódust defaultként deklaráljuk:
 
-Egy class több interface-t is implementálhat, vesszővel sorolhatjuk őket egymás után.
+default void olbeUl() {
+   // kivételesen írunk kódot az interfészbe: felugrik az ölbe, elhelyezkedik, és alszik
+}
 
+Hogyha egy default kóddal ellátott metódust tartalmazó interfészket extendálunk egy másikkal,
+abban a metódust absztaktként felüldefiniálva az azt implementáló osztályokat ismét kötelezhetjük
+a saját implementáció megvalósítására.
 
 
 És miért jó az interface?
@@ -284,7 +296,16 @@ akkor a hiba már nem futásközbeni, hanem fordítási!
 
 Léteznek un. jelölő interface-ek (pl. Serializable) amelyekhez nem kell implementálni semmit.
                                            |
-                                           +---- csomagokra bontható, és máshova továbbítható
+                                           +---- byte láncre bontható, és máshova továbbítható,
+                                                 pl lemezre mentés esetén
+
+
+Egy osztály csak egy másikat extendálhat, de viszont bármennyi interface-t implementálhat.
+
+
+
+Egy interface metódusain implementálhatja egy absztrakt osztály is, de az absztrak osztálynak nem
+kell minden metódust implementálnia. Ami kimarad, azt a leszármazottaiban kell implementálni.
 
 
 Inicializálás

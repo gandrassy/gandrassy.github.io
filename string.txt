@@ -13,8 +13,12 @@ Ha azt írom, hogy abc += "def" akkor nem összefűzés történik, hanem létre
 E közben az eredeti abc által mutatott memóriaterületen még ott marad az eredeti "abc" tartalom. (amelyet idővel az os recyclál majd)
 
 speciális karakterek (string literalok)
- \n = sortörés
+ \n = új sor elejére
+ \r = vissza a sor elejére
+ \f = egy sorrel lejjebb
  \t = tabulátor
+ \b = backspace
+ \' = ' karakter
  \" = " karakter
  \\ = \ karakter
 

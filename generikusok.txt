@@ -1,0 +1,94 @@
+Generikusok
+===========
+
+A generikusok használhatók osztályokban, interfészkekben és metódusokban. 
+Előnyük, hogy ugyanaz a kód használható többféle típusra is.
+
+
+Naming convention:
+------------------
+  E - element  (java collections framework)
+  K - key
+  N - number
+  T - type
+  V - value
+  S,U,V stb - továbby type
+
+
+Generikus osztályok
+===================
+
+Persze, a különböző típusok tárolása megoldható volna az ősosztályba kasztolással is:
+
+public class EnOsztalyom {
+  private Object obj;
+  public void setObj(Object obj) { this.obj = obj; }
+  public Object getObj() { return this.obj; }
+}
+
+Ebben a kódban is bármit tárolhatunk, de a bármit Object-ként adja vissza, és át kell kasztolnunk
+az eredeti típusára tovább használat előtt. Ha ugyan tudjuk, mi az. 
+
+
+ugyanaz generikussal:
+
+public class EnOsztalyom<T> {
+  private T t;
+  public void set(T t) { this.t = t; }
+  public T getObj() { return this.t; }
+}
+
+T bármilyen referencia típus lehet, és visszaadáskor a saját típusában kapjuk meg, nem kell 
+átkasztolni.
+
+
+Gyakorlati példa: ArrayList<String> lista = new ArrayList<String>();
+
+Ennek a get metódusa mindig stringet ad vissza. (Vagy aminek deklaráltzuk.)
+
+
+A java SE7 óta a második típus elhagyható: ArrayList<String> lista = new ArrayList<>();
+A compiler automatikusan behelyettesíti a környezet alapján. 
+Ezt az üres <>-t nevezzük diamond operátornak.
+
+
+Raw type using:
+---------------
+
+EnOsztalyom rawOsztaly = new EnOsztalyom();
+
+Ez esetben a a visszatérési érték Object, át kell kasztolni.
+
+
+Bounded type:
+-------------
+
+A generikusok használata leszűkíthető egy típuscsaládra is, pl:
+
+<T extends Number>
+
+Ez esetben hívhatunk a generikuson csak az adott objektum-családra jellemző metódusokat is.
+
+
+Többszörös bound is lehetséges:
+
+<T extends Float & Double>
+
+
+Megjegyzendő, hogy a generikusok hiearchiáját nem veszi át a class, tehát míg a Number típus
+magába foglalhat egy Integer típust, addig az enOsztalyom<Number> típustnak nem lehet átadni
+egy enOsztalyom<Integer> típust.
+
+
+Generikus metódusok
+===================
+
+public static <T extends Comparable<T>> int hanyElemNagyobbMint(T[] tomb, T hatarertek) {
+   int szamlalo = 0;
+   for (T elem : tomb) {
+      if ( hatarertek.compareTo(elem) < 0 )
+         ++szamlalo;
+   }
+   return szamlalo;
+}
+      
