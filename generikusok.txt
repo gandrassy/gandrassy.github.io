@@ -79,6 +79,9 @@ Megjegyzendő, hogy a generikusok hiearchiáját nem veszi át a class, tehát m
 magába foglalhat egy Integer típust, addig az enOsztalyom<Number> típustnak nem lehet átadni
 egy enOsztalyom<Integer> típust.
 
+Viszont ha enMasodikOsztlyom extends enOsztalyom, akkor enOsztalyom<Number> típus magába
+foglalhatja enMasodikOsztalyom<Number> típust.
+
 
 Generikus metódusok
 ===================
@@ -92,3 +95,13 @@ public static <T extends Comparable<T>> int hanyElemNagyobbMint(T[] tomb, T hata
    return szamlalo;
 }
       
+
+A metódust elvileg így kellene hívni:
+
+valtozo = enOsztalyom.<Integer>hanyElemNagyobbMint(IntegerTomb, Integer.valueOf(20));
+
+de a java compiler az átadott adatokból ki tudja egészíteni a deklarációt (type inference),
+ezért így is lefordul:
+
+valtozo = enOsztalyom.hanyElemNagyobbMint(IntegerTomb, Integer.valueOf(20));
+
