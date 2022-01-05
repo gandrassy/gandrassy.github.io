@@ -15,6 +15,12 @@ Naming convention:
   S,U,V stb - továbby type
 
 
+Megjegyzendő, hogy a generikusok egy absztrakció, fordításkor a java compiler ezeket 
+a bounded típusukkal (vagy ha nincs, akkor az Objecttel) helyettesíti be, és hozzáadja
+a kódhoz a szükséges átkasztolásokat stb. A bytecode már nem tartalmaz olyat, hogy generikus.
+Ez a folyamat a Type Erasure.
+
+
 Generikus osztályok
 ===================
 
@@ -78,9 +84,21 @@ Többszörös bound is lehetséges:
 Megjegyzendő, hogy a generikusok hiearchiáját nem veszi át a class, tehát míg a Number típus
 magába foglalhat egy Integer típust, addig az enOsztalyom<Number> típustnak nem lehet átadni
 egy enOsztalyom<Integer> típust.
+(Viszont ha enMasodikOsztlyom extends enOsztalyom, akkor enOsztalyom<Number> típus magába
+foglalhatja enMasodikOsztalyom<Number> típust.)
 
-Viszont ha enMasodikOsztlyom extends enOsztalyom, akkor enOsztalyom<Number> típus magába
-foglalhatja enMasodikOsztalyom<Number> típust.
+a probléma wildcard-dal hidalható át:
+           --------
+enOsztalyom<? extends Number> az már felveheti enOsztalyom<Integer> értékét. (upper bounded)
+
+fordítva is működik, ha van egy ismeretlen típusom, ami az Integer felett áll a hiearchiában:
+
+enOsztalyom<? super Integer> is felveheti enOsztalyom<Integer> értékét. (lower bounded)
+
+
+wildarcok használatánál bizonyos esetekben előfordulhat fordítási hiba, ekkor helper metódusokat
+csinálnak, erről bővebben itt: https://docs.oracle.com/javase/tutorial/java/generics/capture.html
+
 
 
 Generikus metódusok
@@ -104,4 +122,6 @@ de a java compiler az átadott adatokból ki tudja egészíteni a deklarációt 
 ezért így is lefordul:
 
 valtozo = enOsztalyom.hanyElemNagyobbMint(IntegerTomb, Integer.valueOf(20));
+
+
 
