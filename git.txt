@@ -2,6 +2,7 @@
 ================
 
 letölthető innen: https://git-scm.com/
+dokumentációja:   https://git-scm.com/docs/
 
 komponensei: - windows explorer integráció
              - git BASH (egy linux jellegű parancssoros felület)
@@ -67,4 +68,40 @@ code review
 
 bővebben: https://www.atlassian.com/git/tutorials/learn-git-with-bitbucket-cloud
 
+
+félbehagyott munkák (stashelés)
+-------------------------------
+
+Ha valamit egy fontosabb munka miatt félbe kell hagyni, lehetőség van a félkész fejlesztést
+elmenteni, és később visszatérni a módosítások előtti állapotba. A mentés parancsa:
+
+     git stash -m "some feature the procedure x still fails the test"
+
+Visszatérés az félbehagyott munkához:
+
+     git stash pop
+
+...ez a parancs egyben törli is az utolsó szteshelt állapotot.
+
+
+A parancs többször is kiadható, mert minden elszteshelt változatot egy számindexel lát el.
+Ezek így listázhatók:
+
+     git stash list
+
+Hogy mi van egy-egy stash-ban, meg is nézhető:
+
+     git stash show stash@{1}
+
+Elővenni meg így lehet:
+
+     git stash apply stash@{1}
+
+Egy állapot törlése:
+
+     git stash drop stash@{1}
+
+Az összes állapot törlése:
+
+     git stash clear
 
