@@ -1,0 +1,89 @@
+System.Property
+===============
+
+A java System lehetővé teszi, hogy az applikáció bizonyos konfigurációs változóit letároljuk
+egy fileben. Ennek a neve lehet mondjuk...
+
+   config.properties
+
+
+Ez a file kulcs-érték párokat tartalmaz, valahogy így:
+
+   #Thu Apr 11 17:37:58 SRET 2019
+   db.user=mkyong
+   db.password=password
+   db.url=localhost
+
+* ha egy érték túl hosszú, akkor egy \ karakter jelzi, hogy a következő sorban folytatódik
+
+
+Propertyk kiolvasása:
+---------------------
+
+   String dbuser;
+   String dbpassword;
+   String dburl;
+
+   try (InputStream input = new FileInputStream("path/to/config.properties")) {
+     Properties prop = new Properties();
+     prop.load(input);
+     dbuser = prop.getProperty("db.url");
+     dbpassword = prop.getProperty("db.user");
+     dburl = prop.getProperty("db.password");
+   } catch (IOException ex) {
+     ex.printStackTrace();
+   }
+
+
+A getProperty mindig stringet ad vissza, ezért bizonyos esetekben érdemes a Property
+classt extendálni egy olyannal, amely már tartalmaz getIntProperty, getBooleanProperty
+stb függvényeket is.
+
+
+Megváltozott propertyk kiírása:
+-------------------------------
+
+   try (OutputStream output = new FileOutputStream("path/to/config.properties")) {
+     Properties prop = new Properties();
+     prop.setProperty("db.url", "localhost");
+     prop.setProperty("db.user", "mkyong");
+     prop.setProperty("db.password", "password");
+     prop.store(output, null);
+   } catch (IOException io) {
+     io.printStackTrace();
+   }
+
+Ez a lehetőség használható arra is, hogy user specifikus adatokat tároljon, például az 
+aktuális munkamenetet, amikor az user kilép, hogy legközelebb ugyanott folytathassa.
+
+
+A propertyk betöltése a classpathból:
+-------------------------------------
+
+   InputStream input = MyApp.class.getClassLoader().getResourceAsStream("config.properties")) 
+
+
+A propertyk bejárása:
+---------------------
+
+Mivel a System.Properties extends HashMap, ezért végigiterálni így lehet rajta:
+
+  Set<String> keys = prop.keySet();
+
+  for (String k : keys) {
+    system.out.println(k + " = " + prop.getProperty(k));
+  }
+
+vagy
+
+  Enumeration e = prop.propertyNames();
+  while (e.hasMoreElements()) {
+    String key = (String) e.nextElement();
+    String value = prop.getProperty(key);
+    System.out.println("Key : " + key + ", Value : " + value);
+  }
+
+java 8-tól lambdával:
+
+  prop.forEach((key, value) -> System.out.println("Key : " + key + ", Value : " + value));
+
