@@ -1,0 +1,57 @@
+MyBatis
+=======
+
+Ez is egy perzisztencia réteg, mint a JPA Hibernate. Csak natív query-t használ, viszont minden 
+natív query-t le tud fordítani, nem csak az ORDER-t és a LIMIT-et, hanem JOIN-olni is tudja a 
+táblákat, sőt, az adatbázis-specifikus parancsok is kiadhatók, mint pl. a MERGE. Mindent meg 
+lehet benne csinálni, amit az SQL konzolon. Így, a megfelelően kidolgozott lekérdezések útján
+a javagép mentesíthető az eredmények további feldolgozása alól.
+
+
+fajtái:
+
+Annotation based mapper:
+------------------------
+
+A JPA natív query-hez hasonló, csak nagyon egyszerű lekérdezésekhez használjuk.
+
+public interface UserDao {
+
+  @Select("SELECT * FROM users, uname as userName")  // az adatbázisban uname van, az User 
+  List <User> findAllUsers;                          // objektumban viszont userName 
+
+}
+
+
+xml based mapper:
+-----------------
+
+Az XML mapper előnye, hogy dinamikusan paraméterezhető. 
+Például ez a mapper tud keresni az ügyfél vezetékneve és keresztneve szerint, vagy akár mindkettő szerint is:
+
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.uw.data.mappers.BookMapper">
+
+  <select id="searchCustomers" resultType="Customer"
+  parameterType="SearchCustomerForm">
+
+  SELECT * FROM customers c
+    <where>  <!-- it trims the first OR or AND -->
+      <if test="cusFirstName != null">  //form field
+         AND c.fname = #{firstName}
+      </if>
+      <if test="cusLastName != null">
+         AND c.lname = #{lastName}
+      </if>
+    </where>
+
+  </select>
+
+</mapper>
+
+
+
+bővebben: https://mybatis.org/

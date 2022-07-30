@@ -46,8 +46,12 @@ elemek számának lekérdezése:
   myFirstElements.size();
 
 a tömb kitörlése:
-  myFirstElements.clear()   //azt javasolja, hogy ne használjuk, hanem inkább  myFirstElements = new ArrayList<>(); így új referencia keletkezik, így ha a régi 
-                            //referenciát használják még objektumok, akkor megmarad nekik, ha meg már nem használja senki, úgyis eltünteti a java virtual machine
+  myFirstElements.clear()  
+// Krisz azt javasolta, hogy ne használjuk, hanem inkább definiáljuk újra:
+// myFirstElements = new ArrayList<>(); mert így új referencia keletkezik, így ha a régi referenciát
+// használják még objektumok, akkor megmarad nekik, ha meg már nem használja senki, úgyis eltünteti a
+// java virtual machine. István viszont azt mondta, hogyha kevés elemből áll és nincsenek távoli
+// hivatkozások, akkor kevésbé költséges kiüríteni.
 
 megkérdezem, van-e benne Péter?
   myFirstElements.contains("Péter");

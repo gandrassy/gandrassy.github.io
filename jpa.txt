@@ -1,7 +1,7 @@
 
 ORM: egy olyan cucc, ami automatikusan objektummá konvertálja az adatbázis sorait - és vica versa.
 
-interfésze a JPA (java persistens api), megvalósítása több is van, pl. a Hibernate, Eclipsel.ink, OpenJPA
+interfésze a JPA (java persistens api), megvalósítása több is van, pl. a Hibernate, Eclipsel.ink, OpenJPA, MyBatis
 
 Project létrehozásakor be kell pipálni a SPRING BOOT STARTER DATA JPA dependency-t ÉS a H2 dependency-t vagy a mysql-connector-t
 --------------------------------------------------------------------------------------------------------------------------------
