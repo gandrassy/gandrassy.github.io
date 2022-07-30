@@ -55,3 +55,5 @@ Például ez a mapper tud keresni az ügyfél vezetékneve és keresztneve szeri
 
 
 bővebben: https://mybatis.org/
+
+egy példa: https://github.com/doubleirish/mybatis-spring-boot
