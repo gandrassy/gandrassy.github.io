@@ -68,7 +68,7 @@ A propertyk bejárása:
 
 Mivel a System.Properties extends HashMap, ezért végigiterálni így lehet rajta:
 
-  Set<String> keys = prop.keySet();
+  Set<String> keys = prop.stringPropertyNames();
 
   for (String k : keys) {
     system.out.println(k + " = " + prop.getProperty(k));
