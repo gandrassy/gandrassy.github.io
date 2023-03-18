@@ -45,7 +45,7 @@ Lassú! Ha lehet, kerüljük el.
 
    primitív típusokra nem használható.
    
-   Class c = Class.forName("com.mine.MyClass");  // ez az utasítás készít egy classt ezzel a névvel
+   Class c = Class.forName("com.mine.MyClass");  // megkeresi az ilyen és ilyen nevű classt
    
    Class cDoubleArray = Class.forName("[D");     // tömb: double[].class
 
@@ -122,6 +122,18 @@ Lassú! Ha lehet, kerüljük el.
    c.getFields()
    c.getMethods()
    c.getConstructors()
+   
+   
+   példa: 
+   
+   készítünk egy új példányt, és kinyerjük belőle, milyen ID-t generált a perzisztencia réteg neki.
+   
+   konstruktőr kinyerése:            Constructor<?> constructor = c.getConstructor();
+   új példány létrehozása:           Object object = (Object) constructor.newInstance();
+   
+   egy bizonyos metódus kinyerése:   Method getterMethod = c.getMethod("getUniqueId");
+   a metódus indítása:               Integer generatedId = getterMethod.invoke(object);
+   
    
    
    egyéb hibaelhárítás: https://docs.oracle.com/javase/tutorial/reflect/class/classTrouble.html
