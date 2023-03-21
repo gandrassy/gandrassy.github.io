@@ -22,7 +22,7 @@ Optional<Allat> allatOptional = Optional.of(maci);      // macit betesszük az o
 
 animalOptional = Optional.empty();                      // macit kiveszem az optionalba
 
-if (allatOptional.isPresent()) {                        // ha benne van a maci, kiírja, ha nincs benne semmi, nem fut le
+if (allatOptional.isPresent()) {                        // ha benne van a maci, kiírja. ha nincs benne semmi, nem fut le
   System.out.println(animalOptional.get().toString());  // notSuchsElementExpressiont adna, ha az optional empty
 }
 
