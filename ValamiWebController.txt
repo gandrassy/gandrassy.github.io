@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Controller
-public class ValamiWebController {
+@Controller  
+public class ValamiWebController {    //a returnba csak a template-k nevét kell beírni, amiket renderelnie kell a thymeleaf-nek.
 
   @Autowired
   ValamiService valamiService;

@@ -1,42 +1,53 @@
-﻿package com.gfa.exam.solution.touristinformation.repositories;
+﻿package com.hackerrank.gevents.repository;
 
-import com.gfa.exam.solution.touristinformation.models.Valami;
-import org.springframework.data.repository.CrudRepository;
+import java.util.List;
 
-public interface ValamiRepository extends CrudRepository<Valami, Integer> {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
-  public List<Valami> findAll();
+import com.hackerrank.gevents.model.Event;
 
-// ehhez nem kell query annotáció! itt csak a visszatérési értéket írjuk felül.
+@Repository
+public interface EventRepository extends JpaRepository<Event, Integer> {
 
-  @Query
-  public Valami findValamiByValamiName(String valamiName);  //megkeresi név alapján
+//public interface ValamiRepository extends CrudRepository<Event, Integer> {
 
-  @Query
-  public Valami findFirstByCategoryOrderByPriceDesc(String category); //csökkenő sorrend, tehát a legnagyobbat adja
+    // a save() a findById() és a findAll() alapból benne van, nem kell külön megadni, 
+    // legfeljebb csak akkor, ha a visszatérési értékét akarjuk felülírni, így:
+    
+    public List<Event> findAll();   // ehhez nem kell query annotáció!
 
-  @Query
-  public Valami findFirstByCategoryOrderByPriceAsc(String category);  //növekvő sorrend, tehát a legkisebbet adja
+  
+  	@Query
+	public List<Event> findAllByOrderById();
+                              ^ha ez a "By" kimarad, akkor azt nyivákolja, hogy nem kapott paramétert a kereséshez, és nem tudja
+                                megcsinálni a repository beant, semmi sem fog működni, még az sem, ami jól van megírva.
+	@Query
+	public List<Event> findAllByActorIdOrderById(Integer actorId);
+		
+	@Query
+	public Event findEventById(Integer eventId);
 
 
-// ha UnsatisfiedDependencyException: Error creating bean with name 'ValamiService' fordítási hibát ad
-// akkor rohadjon meg aki kitalálta, és írjuk fel native query-ként:
+    // ha az istennek se akar a legó összejönni, és már elég az unstatisfiedDependencyExceptionokból, akkor lehet írni natív query-t is:
 
-  @Query(value="SELECT * FROM dinosaur WHERE actual>expected", nativeQuery = true)
-  List<Dinosaur> findAllOverpopulated();
-
-// ilyen esetben a függvény neve bármi lehet.
+    @Query(value="SELECT * FROM diosaur WHERE name = :specy AND population > excepted", nativeQuery = true)
+    List<Dinosaur> findAllOverpopulated(String specy);   // ilyen esetben a függvény neve bármi lehet.
 
 
+    @Query
+    public Valami findFirstByCategoryOrderByPriceDesc(String category); //csökkenő sorrend, tehát a legnagyobbat adja
 
-// az eredmények betehetőek pojokba is, ez esetben a pojoknak megfelelő konstruktőrük kell legyen
 
-  @Query("SELECT new hu.nive.ujratervezes.kepesitovizsga.housecup.models.Winner(sum(h.pointsEarned), h.houseName) FROM HousePoints as h GROUP BY h.houseName")
-  List<Winner> listHouseCupWinners();
+    // az eredmények betehetőek pojokba is, ez esetben a pojoknak megfelelő konstruktőrük kell legyen
+ 
+    @Query("SELECT new hu.nive.ujratervezes.kepesitovizsga.housecup.models.Winner(sum(h.pointsEarned), h.houseName) FROM HousePoints as h GROUP BY h.houseName")
+    List<Winner> listHouseCupWinners();
 
-  @Query("SELECT new hu.nive.ujratervezes.kepesitovizsga.housecup.models.Valedictorian(count(h.studentName), h.studentName) FROM HousePoints as h GROUP BY h.studentName")
-  List<Valedictorian> getValedictorian();
+    @Query("SELECT new hu.nive.ujratervezes.kepesitovizsga.housecup.models.Valedictorian(count(h.studentName), h.studentName) FROM HousePoints as h GROUP BY h.studentName")
+    List<Valedictorian> getValedictorian();
 
-// ezek a pojok nem @Entity taggeltek, csak közönséges objektumok
+    // ezek a pojok nem @Entity taggeltek, csak közönséges objektumok
 
 }
