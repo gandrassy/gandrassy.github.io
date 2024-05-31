@@ -46,7 +46,16 @@ public class ValamiRestController {
 	public List<Event> gimmeByUser(@PathVariable Integer userId) {
 		return eventRepository.findAllByActorIdOrderById(userId);
 	}
-	
+
+    // url paraméterrel meghvott végpont: localhost:8080/userevents?user=231
+    @GetMapping("/usersevents")
+	public List<Event> gimmeByUser(@RequestParam(required = false, defaultValue = null, value="user") Integer userId) {
+        if (userId == null) {
+           throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "no user set");
+        }
+		return eventRepository.findAllByActorIdOrderById(userId);
+	}
+    
     //ha van event, 200-al visszaadja, ha nincsen, akkor 404 nem található	
 	@GetMapping("/events/{eventId}")
 	public Event getById(@PathVariable Integer eventId) {
