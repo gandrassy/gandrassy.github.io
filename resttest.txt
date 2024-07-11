@@ -2,7 +2,7 @@ package com.hackerrank.gevents;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hackerrank.gevents.model.Event;
+import com.hackerrank.gevents.model.Event;  
 import com.hackerrank.gevents.repository.EventRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,63 +25,101 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest  // ez egy integrációs teszt
+
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+
 @AutoConfigureMockMvc
+
 public class ApplicationTests {
-    ObjectMapper om = new ObjectMapper();
+    
+    ObjectMapper om = new ObjectMapper(); //serializálást és deserializálást végző lib.
+
     @Autowired
-    EventRepository eventRepository;
+    EventRepository eventRepository;  // itt az Event a db pojo, és az EventRepository a jpa repository, amiben a findall...() függvények vannak
+
     @Autowired
     MockMvc mockMvc;
 
-    Map<String, Event> testData;
+    Map<String, Event> testData;      // ebben Event objektumok vannak 
 
-    @BeforeEach
+    @BeforeEach                       // minden teszt futtatása előtt  törli a repoban tárolt adatokat, és újra inicializálja a teszt objektumokat
     public void setup() {
         eventRepository.deleteAll();
         testData = getTestData();
     }
 
+
+
+    /* eventek eltárolása a db-be */
+
     @Test
     public void testEventCreation() throws Exception {
-        Event expectedRecord = testData.get("event_01_push_actor_1");
-        Event actualRecord = om.readValue(mockMvc.perform(post("/events")
-                        .contentType("application/json")
-                        .content(om.writeValueAsString(expectedRecord)))
-                .andDo(print())
-                .andExpect(jsonPath("$.id", greaterThan(0)))
-                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString(), Event.class);
+        
+        Event expectedRecord = testData.get("event_01_push_actor_1"); 
+        
+        String jsonExpectedRecord = om.writeValueAsString(expectedRecord);
+        
+        String jsonResponseBody = 
+            mockMvc.perform(                      //meghív egy rest végpontot
+                post("/events")                   //post típusú az "/events" végpontra
+                .contentType("application/json")  //json formátumú lesz a beküldött adat
+                .content( jsonExpectedRecord )    //az adat a deserializált exceptedRecord
+            )                                     //itt egy ResultActions típusú objektum jött létre
+                
+            .andDo(                               //végrehajtja a ResultActions-t
+               print()                            //a konzolra írja, mit küldött be, mit kapott vissza
+            )
+            .andExpect(                           //elvárja, hogy...
+               jsonPath("$.id", greaterThan(0))   //az id property nagyobb legyen 0-nál
+            )
+            .andExpect(                           //evárja, hogy...
+               status().isCreated()               //a httpStatus created (201-es) legyen
+            )
+            .andReturn()                          //a server válasza (MvcResult)
+            .getResponse()                        //ebből a törzs (MockHttpServletResponse)
+            .getContentAsString()                 //a body stringként
+        ;
+        
+        //deserializálja Event objektumba
+        Event actualRecord = om.readValue( jsonResponseBody, Event.class ); 
 
-        Assertions.assertTrue(new ReflectionEquals(expectedRecord, "id").matches(actualRecord));
+        //mindennek azonosnak kell lennie, kivéve az "id" propertyt
+        Assertions.assertTrue(new ReflectionEquals(expectedRecord, "id").matches(actualRecord)); 
+
+        //szerepelnie kell a repository-ban
         assertEquals(true, eventRepository.findById(actualRecord.getId()).isPresent());
-
-        expectedRecord = testData.get("event_02_watch_actor_1");
-        actualRecord = om.readValue(mockMvc.perform(post("/events")
-                        .contentType("application/json")
-                        .content(om.writeValueAsString(expectedRecord)))
-                .andDo(print())
-                .andExpect(jsonPath("$.id", greaterThan(0)))
-                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString(), Event.class);
-
-        Assertions.assertTrue(new ReflectionEquals(expectedRecord, "id").matches(actualRecord));
-        assertEquals(true, eventRepository.findById(actualRecord.getId()).isPresent());
-
-        //test invalid
-        expectedRecord = testData.get("event_01_push_actor_1");
-        expectedRecord.setType("pushevent");
-        mockMvc.perform(post("/events")
-                        .contentType("application/json")
-                        .content(om.writeValueAsString(expectedRecord)))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
 
     }
+
+    
+    @Test
+    public void testInvalidEventCreation() throws Exception {
+
+        Event expectedRecord = testData.get("event_01_push_actor_1");
+        expectedRecord.setType("pushevent");
+        
+        String jsonExpectedRecord = om.writeValueAsString(expectedRecord);
+        
+        mockMvc.perform(post("/events").contentType("application/json").content(jsonExpectedRecord))
+                .andDo(print())
+                .andExpect(
+                    status().isBadRequest()
+                )
+        ;
+
+    }
+
+
+
+    /* összes event lekérése a db-ből */
 
     @Test
     public void testGetAllEvents() throws Exception {
         Map<String, Event> testData = getTestData().entrySet().stream().filter(kv -> "event_01_push_actor_1, event_01_release_actor_1, event_01_watch_actor_1".contains(kv.getKey())).collect(Collectors.toMap(kv -> kv.getKey(), kv -> kv.getValue()));
 
+        //beküldi az összes teszt objektumot a db-be, és a ID szerint sorba rendezi a válaszul kapott objektumokat
+        
         List<Event> expectedRecords = new ArrayList<>();
         for (Map.Entry<String, Event> kv : testData.entrySet()) {
             expectedRecords.add(om.readValue(mockMvc.perform(post("/events")
@@ -92,6 +130,9 @@ public class ApplicationTests {
         }
         Collections.sort(expectedRecords, Comparator.comparing(Event::getId));
 
+        //lekéri GET-tel az összes objektumot a db-ből
+        //elvárja, hogy egy tömb legyen a válasz, és annak a mérete a tesztadatok tömbjével azonos legyen
+
         List<Event> actualRecords = om.readValue(mockMvc.perform(get("/events"))
                 .andDo(print())
                 .andExpect(jsonPath("$.*", isA(ArrayList.class)))
@@ -99,10 +140,17 @@ public class ApplicationTests {
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(), new TypeReference<List<Event>>() {
         });
 
+
+        // egyenként összehasonlítja a beküldött objektumokat és a GET-tel lekérteket.
+        // nota bene: ez így csak akkor jó, ha a GET kérés ID szerint sorba rendezve adja vissza az objektumokat.
+
         for (int i = 0; i < expectedRecords.size(); i++) {
             Assertions.assertTrue(new ReflectionEquals(expectedRecords.get(i)).matches(actualRecords.get(i)));
         }
     }
+
+
+    /* objektum lekérése ID alapján */
 
     @Test
     public void testGetEventWithId() throws Exception {
@@ -126,6 +174,9 @@ public class ApplicationTests {
         mockMvc.perform(get("/events/" + Integer.MAX_VALUE))
                 .andExpect(status().isNotFound());
     }
+
+
+    /* objektumok lekérdezése egyik tulajdonságuk alapján */
 
     @Test
     public void testGetEventByRepos() throws Exception {
@@ -244,6 +295,7 @@ public class ApplicationTests {
     }
 
 
+    //teszt objektumok létrehozása
     private Map<String, Event> getTestData() {
         Map<String, Event> data = new HashMap<>();
 
