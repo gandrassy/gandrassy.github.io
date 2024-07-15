@@ -1,0 +1,101 @@
+Mi az újdonság a java 17-ben a 8-hoz képest?
+
+
+1. Rugalmas belépési pont: a Main() nem public static metódus, class deklaráció helyett is használható
+   --- myprogram.java ---
+   void Main() {
+      System.out.println("Hello world.");
+   }
+   ---
+
+
+2. Record típus
+
+   a hagyományos pojo classok helyett elég már egy sor:
+   --- mypojo.java ---
+   public record Citizen(Long id, Sting name) {
+      
+      //a konstruktőrben megadható validáció:
+      public Citizen {
+         if (name == null) {
+             throw new ValidationException(“Account number invalid”);
+         }
+         //nem kellenek további értékadások, ez így kész.
+      }
+   
+   }
+   ---
+   
+   nem kellenek getterek, setterek, csak ennyi.
+   
+   Ez a típus nem kiterjeszthető, és ő sem terjeszthet ki másikat, de interface-elhető.
+
+   
+3. értékadás switchel:
+
+   String season = switch (month) {
+      case: "Dec","Jan","Feb" -> "Winter";
+      case: "March","April","May" -> "Springtime";
+      case: "June","July","Aug" -> "Summer";
+      case: "Sept","Okt","Now" -> "Authumn";
+      default -> throw new IllegalStateException("Invalid month: "+month);
+   }
+   
+   
+4. a szövegmezők tördelhetőek:
+
+   final String message = """
+                            itt egy nagyon-nagyon
+                            hosszú üzenetet lehet
+                            leírni
+                          """;
+              
+              
+5. egyszerűbb kasztolás:
+
+   if (myObject instanceof Citizen citizen) {
+       return citizen.name; //mivel Citizen típus volt az objektum, 
+   }                        //rögtön megcsinálta a citizen példányt is.
+   
+   
+6. sealed módosítószó
+
+   public sealed class VisegradFours permits Hungary, Sovakie, CzechRepublic, Poland {}
+   
+   Ez esetben a public class France extends VisegradFour {} fordítási hibával elszáll.
+   
+   
+7. objektumok rövidebben deklarálhatók, mint előtte:
+
+   var myobject = new HashMap<BigDecimal, String>();
+   
+   funkcionális interface-t nem lehet így definiálni, de lambdákban használható, pl:
+   
+   boolean isThereAneedle = stringsList.stream().anyMatch((@NonNull var s) -> s.equals(“needle”));
+      
+      
+8. néhány új függvény:
+
+   az Otional az .orElse() mellé kapott egy .orElseThrow() függvényt is.
+
+   a feltételek megfordíthatók:
+   collection.stream().filter(Predicate.not(MyObject::isEmpty)).collect(Collectors.toList());
+
+   a string kapott isBlank()-ot, strip()-et és indent()-et. 
+
+   nem kell külön List instance-ot csinálni csak ezért sem:
+   String[] myArray= aList.toArray(String[]::new);
+
+   gyors file elérés:
+   Path path = Files.writeString(myFile, "Pretius Rules All !");
+   String fileContent = Files.readString(path);
+
+   lett .toList() függvény a stream()-on
+   String[] arr={"a", "b", "c"};
+   var list = Arrays.stream(arr).toList();
+
+9. a nullpointer exception hibaüzenet részletesebb
+   újfajta garbage collector
+   container integration (nem lépi túl a konténerben neki deklarált memóriát)
+   Java Flight Recorder and Java Mission Control - gowroot szerű toolkit
+
