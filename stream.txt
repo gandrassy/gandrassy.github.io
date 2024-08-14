@@ -1,139 +1,3 @@
-10. hét (jan 14-től)
-
-
-UML Alapok
-==========
-
-a training 360-ban átnézendő
-
-
-Optional
-========
-
-Egy olyan objektum, amely tartalmazhat egy másik objektumot.
-A nullpointer exceptionok kivédésére való. 
-
-Import java.utils.Optional;
-
-Allat maci = new Allat("Buci");
-
-Optional<Allat> allatOptional = Optional.of(maci);      // macit betesszük az optionalba. Muszáj, hogy amit beteszünk, az ne null értékű legyen, 
-                                                        // mert különben már ez a sor nullPointerExceptiont dob
-
-animalOptional = Optional.empty();                      // macit kiveszem az optionalba
-
-if (allatOptional.isPresent()) {                        // ha benne van a maci, kiírja. ha nincs benne semmi, nem fut le
-  System.out.println(animalOptional.get().toString());  // notSuchsElementExpressiont adna, ha az optional empty
-}
-
-
-Létezik olyan optional hogy .ofNullable() ami tartalmazhat null-t is. Ez esetben megadható egy default érték:
-
-allatOptional.orElse(maci)     // ha null értékű az optional, akkor macit ad vissza.
-
-
-példa:
-
-List<Allat> allatok = new Arraylist<>();
-allatok.add("Lama",1934,"him");
-allatok.add("Alpakka",1963,"him");
-allatok.add("Oszver",1977,"nosteny");
-allatok.add("Pinto",1982,"nosteny");
-
-
-public static Optional<Allat> elsoOregAllat(List<Animal> animals) {
-  LocalDateTime now = LocalDateTime.now();
-  int mostaniEv = now.getYear();
-  for (Animal animal : animals) {
-    int eletkora = mostaniEv - allat.getBirthYear();
-    if (eletkora > 40) return Optional.of(animal); 
-  }
-  return Optional.empty();
-}
-
-System.out.println( elsoOregAllat(allatok).orElse(null) );
-
-
-
-Lambda expression ->
-====================
-
-Használható a kód rövidítésére is, de nem csak erre jó: lehetőséget ad a funkcionális programozásra.
-
----
-
-package lambda;
-
-public interface MorogniKepes {
-
-  public void morog();
-
-}
-
----
-
-package lambda;
-
-public class Program {
-
-  public void megmorgat(MorogniKepes a) {    // egy olyan objektumot vár paraméterként, amelyik implementálja ezt az interface-t,
-    a.morog();                               // és amikor megkapta, akkor megmorgatja
-  }
-
-  public void main(Srting[] args) {
-    Kutya buksi = new Kutya();               //csinálni kell egy Dog classt, ami implementálja az interfészt
-    megmorgat(buksi); 
-
-    // ha nem akarok csak ezért egy kutya osztályt csinálni, akkor jön a lambda:
-
-    MorogniKepes morog = (int hossz) -> {        //betesszük a kódot egy változóba, aminek a típusa az interface neve
-      System.out.print("gr");
-      for (int i=0; i<hossz; i++) System.out.print("r");
-      System.out.println("");
-    };                                           // return érték is megadható!
-    megmorgat(morog);                            //és megmorgatható a nélkül, hogy csináltunk volna egy kutyát hozzá!
-
-  }
-
-}
-
----
-
-
-Guba Krisztián féle lambda:
-
-public class TryLambda {
-
-  public static void main(String[] args) {
-
-    Udvozlo udvozlo = new Udvozlo() {             //anonimusz class
-      public String udv() { return "hello"; }
-    }
-
-    // ez felírható így is:
-
-    Udvözlo udvozlo = () -> "hello";   // a lambda mindig _csak_egy_metódus_
-
-    Collable<String> proba = () -> "hello";
-
-    Function<String,String> udvozlo = (String name) -> "BUÉK" + name + "!";   //a <> az egyik String a bemeneti paraméter, a másik String a visszatérési érték
-    System.out.println( udvozlo.apply("Krisz") );
-
-    BiFunction<String, Integer, Long> fuggveny = (String name, Integer number) -> name.length()+number+0L;         // string és int bemenet, long kimenet
-
-    Counter szamlalo = (String name, Integer number) -> name.length()+number+0L;
-
-
-  }
-
-}
-
-A lambda kifejezések használata új objektumokat hoz létre. Ha a lambda kontextusfüggő, akkor
-mindenképpen, hogyha nem kontextus függő, akkor elvileg a javagép escape analisys által 
-újrahasznosítja, de ez még nem ellenőrzött, hogy mennyire működőképes.
-
-
-
 Java Stream API
 ===============
 
@@ -269,8 +133,9 @@ String eredmény = elsoPiros.map( ruha -> "Az első piros:" + ruha)     // ha vi
 --- krisztián féle agyolvasztó ---
 
 köztes operátor
-  .filter
-  .map    // átalakít egy másik adatszerkezetté
+  .filter    // kiszűri azt, amire a preikátum igaz
+  .distinct  // csak az object.equals() szerint nem azonos elemeket tartja meg
+  .map       // átalakít egy másik adatszerkezetté
 
 terminális operátor
 
@@ -301,3 +166,42 @@ String nevek = allatok.stream()
   .parallel()                       // szétosztja a streamet multiprocessz környezetbe
   .map(animal::getName)             // kimappelem csak a neveket
   .collect(Collectors.joining());   // összefűzi a három nevet
+  
+  
+  
+gyakran használt streamek:
+--------------------------
+
+
+List<Allat> allatok;
+
+
+Az objektumok felmapelése id szerint:
+
+Map<Integer, Allat> allatById = allatok.stream().collect(Collectors.toMap(Allat::getId, Function.identity()));
+
+
+Az objektumok egy fieldjének felmapelése:
+
+Map<Integer, String> allatById = allatok.stream().collect(Collectors.toMap(Allat::getId, Allat::getName));
+
+
+az objektumok Id-inek kigyűjtése egy setbe:
+
+Set<Integer> ids = a.stream().map(Allat::getId).collect(Collectors.toSet());
+
+
+Az azonos fajú állatok mapolása fajok szerint:
+
+Map<String, List<Allat>> egyedek = allatok.stream().collect(Collectors.groupingBy(Allat::getSpecy));
+
+
+Feltételnek való megfelelés ellenőrzése az egész kollekcióra:
+
+boolean isWolfThere = c.stream().anyMatch( allat -> { return e.getSpecy().equals("farkas");  }  );
+boolean isNoAnyWolfThere = c.stream().noneMatch( allat -> { return e.getSpecy().equals("farkas");  }  );
+
+
+megszámolja, hány állatunk van:
+
+int allatszam = allatok.stream().distinct().count();

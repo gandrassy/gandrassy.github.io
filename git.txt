@@ -45,7 +45,8 @@ saját módosítások feltöltése:   git push
 code review
 -----------
 
-1. a központi repót forkolom, és klónozom a saját gépemre
+1. a központi repót forkolom, a github.com-on vagy bitbucketen
+   utána a forkot klónozom a saját gépemre
 
 2. csinálok egy új branchet annak, amit hozzáfejlesztenék:
 
@@ -59,12 +60,13 @@ code review
 
      git push origin some-branch
 
-4. a githubon a saját forked repóból csinálok egy pull requestet
+4. a githubon vagy bitbucketen a saját forkolt repóból csinálok egy pull requestet
+   a 'pull-request' buttonnal
 
-     a source branch az a saját branchem, a some-feature,
-     a destination branch a a senior develpoer saját repójában a main
+     a "source branch" az a saját branchem, a some-feature,
+     a "destination branch" az a senior develpoer saját repójában a main
 
-5. a senior beletenyerel a merge gombba, és ezzel bekerül a fősodorba.
+5. a senior beletenyerel a merge gombba, és innentől fogva az ő dolga.
 
 bővebben: https://www.atlassian.com/git/tutorials/learn-git-with-bitbucket-cloud
 
