@@ -1,7 +1,7 @@
 Aszinkron hívás a Spring frameworkben
 =====================================
 
-Hosszadalmas eljárásoknál használjuk, hogy közben az user csinálhasson mást.
+Hosszadalmas eljárásoknál használjuk, hogy közben az user csinálhasson valami mást.
 
 Ha a meghívott metódus aszinkronnak van annotálva, akkor a vezérlés visszakerül a benne lévő kód végrehajtása előtt
 a programtörzsbe, és egy másik szálon hajtja végre. 
@@ -9,17 +9,16 @@ a programtörzsbe, és egy másik szálon hajtja végre.
 
 Pl:
 
-
     @GetMapping("/createTasks")
-	public ResponseEntity<String> gimmeByRepo(@PathVariable Integer repoId) {
-		tasksService.createTasks()
-		return new ResponseEntity<String>("Process startet", HttpStatus.PROCESSING);
+    public ResponseEntity<String> gimmeByRepo(@PathVariable Integer repoId) {
+        tasksService.createTasks()
+        return new ResponseEntity<String>("Process startet.", HttpStatus.PROCESSING);
     }
     
     @Async
-	public void createTasks() {
-		//do something
-	}
+    public void createTasks() {
+        //creating tasks
+    }
     
     
     
@@ -40,15 +39,15 @@ is oly módon, hogy a metódust paraméterként adjuk át:
     }
     
     @Async
-    public void createTasks(Consumer<String> callback) {   //  Function típus, ha egy paramétert vár és egy paramétert visszaad
+    public void createTasks(Consumer<String> callback) {   //  Consumer típus, ha egy paramétert vár és void
+        //creating tasks                                   //  Function típus, ha egy paramétert vár és egy paramétert visszaad
         String message = new ArrayList();                  //  Supplier típus, ha nem vár paramétert, de visszaad egy értéket
-        //fill message                                     //  Consumer típus, ha egy paramétert vár és void
-        callback.accept(message);                          // Predicate típus, ha egy paramétert vár és booleant ad vissza
-    }
-                                                           // Léteznek BiConsumer, BiFunction BiPredicate típusok (két paraméterrel)
+        //fill message                                     // Predicate típus, ha egy paramétert vár és booleant ad vissza
+        callback.accept(message);                          
+    }                                                      // Léteznek BiConsumer, BiFunction BiPredicate típusok (két paraméterrel)
                                                            // és tipusos változatok, mint BooleanSupplier, DoubleConsumer, DoubleFunction,  
                                                            // DoublePredicate, DoubleSupplier, DoubleToIntFunction, DoubleToLongFunction    
-    public void sendEmail(String message) {
+    public void sendEmail(String message) {                // amelyeknél a diamond operátor mellőzhető
         //send the string in email.
     }
     
