@@ -27,31 +27,31 @@ Előfordulhat, hogy az aszinkron metódus végrehajtása után egy másik metód
 is oly módon, hogy a metódust paraméterként adjuk át:
 
 
-    @GetMapping("/createTasksAndEmailToMe")
-	public ResponseEntity<String> gimmeByRepo(@PathVariable Integer repoId) {
-		tasksService.createTasks(messageService::sendEmail);
-		return new ResponseEntity<String>("Process startet.", HttpStatus.PROCESSING);
+    @GetMapping("/createTasksAndEmailToMeWhenDone")
+    public ResponseEntity<String> gimmeByRepo(@PathVariable Integer repoId) {
+        tasksService.createTasks(messageService::sendEmail);
+        return new ResponseEntity<String>("Process startet.", HttpStatus.PROCESSING);
     }
     
-    @GetMapping("/createTasksAndSMSToMe")
-	public ResponseEntity<String> gimmeByRepo(@PathVariable Integer repoId) {
-		tasksService.createTasks(messageService::sendSMS);
-		return new ResponseEntity<String>("Process startet.", HttpStatus.PROCESSING);
+    @GetMapping("/createTasksAndSMSToMewhenDone")
+    public ResponseEntity<String> gimmeByRepo(@PathVariable Integer repoId) {
+        tasksService.createTasks(messageService::sendSMS);
+        return new ResponseEntity<String>("Process startet.", HttpStatus.PROCESSING);
     }
     
     @Async
-	public void createTasks(Consumer<String> callback) {   //  Function típus, ha egy paramétert vár és egy paramétert visszaad
+    public void createTasks(Consumer<String> callback) {   //  Function típus, ha egy paramétert vár és egy paramétert visszaad
         String message = new ArrayList();                  //  Supplier típus, ha nem vár paramétert, de visszaad egy értéket
-		//fill message                                     //  Consumer típus, ha egy paramétert vár és void
+        //fill message                                     //  Consumer típus, ha egy paramétert vár és void
         callback.accept(message);                          // Predicate típus, ha egy paramétert vár és booleant ad vissza
-    }    
-	                                                       // Léteznek BiConsumer, BiFunction BiPredicate típusok (két paraméterrel)
+    }
+                                                           // Léteznek BiConsumer, BiFunction BiPredicate típusok (két paraméterrel)
                                                            // és tipusos változatok, mint BooleanSupplier, DoubleConsumer, DoubleFunction,  
                                                            // DoublePredicate, DoubleSupplier, DoubleToIntFunction, DoubleToLongFunction    
-	public void sendEmail(String message) {
-		//send the string in email.
-	}
+    public void sendEmail(String message) {
+        //send the string in email.
+    }
     
     public void sendSMS(String message) {
-		//send the string in sms message.
-	}
+        //send the string in sms message.
+    }
