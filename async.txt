@@ -1,0 +1,57 @@
+Aszinkron hívás a Spring frameworkben
+=====================================
+
+Hosszadalmas eljárásoknál használjuk, hogy közben az user csinálhasson mást.
+
+Ha a meghívott metódus aszinkronnak van annotálva, akkor a vezérlés visszakerül a benne lévő kód végrehajtása előtt
+a programtörzsbe, és egy másik szálon hajtja végre. 
+
+
+Pl:
+
+
+    @GetMapping("/createTasks")
+	public ResponseEntity<String> gimmeByRepo(@PathVariable Integer repoId) {
+		tasksService.createTasks()
+		return new ResponseEntity<String>("Process startet", HttpStatus.PROCESSING);
+    }
+    
+    @Async
+	public void createTasks() {
+		//do something
+	}
+    
+    
+    
+Előfordulhat, hogy az aszinkron metódus végrehajtása után egy másik metódust kell majd meghívni. Ez akár lehet konfigurálható
+is oly módon, hogy a metódust paraméterként adjuk át:
+
+
+    @GetMapping("/createTasksAndEmailToMe")
+	public ResponseEntity<String> gimmeByRepo(@PathVariable Integer repoId) {
+		tasksService.createTasks(messageService::sendEmail);
+		return new ResponseEntity<String>("Process startet.", HttpStatus.PROCESSING);
+    }
+    
+    @GetMapping("/createTasksAndSMSToMe")
+	public ResponseEntity<String> gimmeByRepo(@PathVariable Integer repoId) {
+		tasksService.createTasks(messageService::sendSMS);
+		return new ResponseEntity<String>("Process startet.", HttpStatus.PROCESSING);
+    }
+    
+    @Async
+	public void createTasks(Consumer<String> callback) {   //  Function típus, ha egy paramétert vár és egy paramétert visszaad
+        String message = new ArrayList();                  //  Supplier típus, ha nem vár paramétert, de visszaad egy értéket
+		//fill message                                     //  Consumer típus, ha egy paramétert vár és void
+        callback.accept(message);                          // Predicate típus, ha egy paramétert vár és booleant ad vissza
+    }    
+	                                                       // Léteznek BiConsumer, BiFunction BiPredicate típusok (két paraméterrel)
+                                                           // és tipusos változatok, mint BooleanSupplier, DoubleConsumer, DoubleFunction,  
+                                                           // DoublePredicate, DoubleSupplier, DoubleToIntFunction, DoubleToLongFunction    
+	public void sendEmail(String message) {
+		//send the string in email.
+	}
+    
+    public void sendSMS(String message) {
+		//send the string in sms message.
+	}
