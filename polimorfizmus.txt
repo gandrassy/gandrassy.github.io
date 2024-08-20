@@ -1,0 +1,74 @@
+Polimorfizmus a Springben
+=========================
+
+
+Előfordulhat, hogy egy bizonyos szolgáltatásra több implementációnk is lesz, amelyek közül hol ez, hol meg az fog kelleni.
+Ez esetben a komponenseket interface-elni kell, és az interface-t kell Autowireddel bekötni.
+
+
+
+public interface ReservationIntf {
+
+    void reservee();
+
+}
+
+@Service
+@Primary
+@Qualifier("CommissioningReserveeService")
+public static class ReservateFromCommissioningArea implements ReservationIntf {
+
+    @Override
+    public void reservee() {
+        //do something
+    }
+
+}
+
+@Service
+@Qualifier("BackgroundReserveeService")
+public static class ReservateFromBackgroundArea implements ReservationIntf {
+
+    @Override
+    public void reservee() {
+        //do something
+    }
+
+}
+
+
+Ezek után beköthetjük akár az egyik szervízt:
+
+@Autowired
+@Qualifier("BackgroundReserveeService")              //A Qualifier mondja meg, hogy az implementációk közül melyik kerüljön ide.
+private ReservationIntf reservationService;          //Ha nincs megadva, akkor a @Primary-nak annotált implementációt köti be.
+                                                     //Ha olyan sincs, akkor NoUniqueBeanDefinitionException-t dob induláskor
+
+
+A választott szerviz beköthető a qualifier heyett classname-el is:
+
+@Autowired
+private ReservationIntf reservateFromCommissioningArea;
+
+@Autowired
+private ReservationIntf reservateFromBackgroundArea;
+
+
+
+Ha nem akarjuk beégetni a szervizek nevét, például mert egy moduláris rendszerben lehetőséget akarunk hagyni customizált 
+komponensek hozzáadására is, akkor beköthetjük az interface összes rendelkezésünkre álló implementációját egy kollekcióba:
+
+@Autowired(required = false)                         //ha egyetlen egy implementáció sincs, azért még el tudjon indulni
+private List<ReservationIntf> reservationServices;   //a talált implementációk kollekcióba kerülnek
+
+És e kollekcióból már tetszés szerint választhatunk a programtörzsben.
+
+
+void doCustomReservationIfAvailable() {
+        for(ReservationIntf reservationService : reservationServices) {
+            if("CustomReserveeService".equals((sup.getClass().getAnnotation(Qualifier.class).value()))){
+                reservationService.reservee();
+            }
+            return;
+        }
+    }
