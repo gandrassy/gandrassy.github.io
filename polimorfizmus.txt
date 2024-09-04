@@ -66,7 +66,7 @@ private List<ReservationIntf> reservationServices;   //a talált implementáció
 
 void doCustomReservationIfAvailable() {
         for(ReservationIntf reservationService : reservationServices) {
-            if("CustomReserveeService".equals((sup.getClass().getAnnotation(Qualifier.class).value()))){
+            if("CustomReserveeService".equals((reservationService.getClass().getAnnotation(Qualifier.class).value()))){
                 reservationService.reservee();
             }
             return;

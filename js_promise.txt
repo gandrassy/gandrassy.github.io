@@ -1,0 +1,22 @@
+A javascript promise-sal megállítható a js futása addig, amíg egy feltétel nem teljesül.
+
+
+Például ha egy adatra van szükségünk a továbblépéshez:
+
+
+  var filterKitProds = function(items) { 
+
+     const kitProductIds = await new Promise(resolve => {
+        app.util.get('api/product/getkitproductids').done( function(resp) { resolve(resp); } );
+     });
+
+     //ide már csak akkor jut el a vezérlés, hogyha a végpont visszaadta a kitproductid-ket
+  
+     var kitItems = items.filter( item => kitProductIds.includes(item.productId()) );
+     
+     //...valami történik a kitItems-sel
+  }
+  
+  
+Kerülendő pattern, mert nagyon lelassíthatja az oldal betöltődését vagy működsét, csak akkor használjuk,
+hogyha a végrehajtás úgysem áll meg hamarosan felhasználói interakcióra várva, pl. "save and exit" esetében.
