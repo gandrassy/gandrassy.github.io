@@ -41,6 +41,19 @@ Mi az újdonság a java 17-ben a 8-hoz képest?
       default -> throw new IllegalStateException("Invalid month: "+month);
    }
    
+   megjegyzés: értékadás nélkül is lehet nyilazni:
+   
+   switch (szam) {
+      case "egy" -> System.out.println("1");
+      case "kettő" -> System.out.println("2");
+      case "három" -> { 
+          System.out.println("sok");
+          System.out.println("nagyon sok"); 
+      }
+      case "négy" -> throw new RuntimeException();
+   }
+   
+   ilyenkor nincs fallthrough, nem kell brékelni.
    
 4. a szövegmezők tördelhetőek:
 

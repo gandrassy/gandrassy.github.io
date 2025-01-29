@@ -1,0 +1,32 @@
+Hogy a böngéső cache-ban ragadó régi javascriptektől megszabaduljnunk, a Spring tud olyat, hogy a neveket kiegészíti egy md5 hash taggal.
+
+
+A spring.configba:
+
+
+@Configuration
+public class MvcApplication extends WebMvcConfigurerAdapter {
+
+  @Override
+  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    VersionResourceResolver versionResourceResolver = new VersionResourceResolver()
+        .addVersionStrategy(new ContentVersionStrategy(), "/**");
+
+    registry.addResourceHandler("/javascript/*.js")
+        .addResourceLocations("classpath:/static/")
+        .setCachePeriod(60 * 60 * 24 * 365) /* one year */
+        .resourceChain(true)
+        .addResolver(versionResourceResolver);
+  }
+
+  ...stb
+}
+
+
+A thymeleaf template-be:
+
+<script type="application/javascript" th:src="${@mvcResourceUrlProvider.getForLookupPath('/javascript/test.js')}"> </script>
+
+
+így a spring mindig létrehoz egy hashtaget tartalmazó aliast, és azt cacheli a böngésző. Ezt az alias name-t printeli be a template-be.
+Ha a scripten változtatnak, megváltozik a script neve, az új néven nem lesz semmi a cache-ban, tehát a browser újratölt. 
