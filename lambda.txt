@@ -1,12 +1,6 @@
 10. hét (jan 14-től)
 
 
-UML Alapok
-==========
-
-a training 360-ban átnézendő
-
-
 Optional
 ========
 
@@ -20,7 +14,7 @@ Allat maci = new Allat("Buci");
 Optional<Allat> allatOptional = Optional.of(maci);      // macit betesszük az optionalba. Muszáj, hogy amit beteszünk, az ne null értékű legyen, 
                                                         // mert különben már ez a sor nullPointerExceptiont dob
 
-animalOptional = Optional.empty();                      // macit kiveszem az optionalba
+allatOptional = Optional.empty();                      // macit kiveszem az optionalból
 
 if (allatOptional.isPresent()) {                        // ha benne van a maci, kiírja. ha nincs benne semmi, nem fut le
   System.out.println(animalOptional.get().toString());  // notSuchsElementExpressiont adna, ha az optional empty
@@ -81,52 +75,26 @@ public class Program {
   }
 
   public void main(Srting[] args) {
-    Kutya buksi = new Kutya();               //csinálni kell egy Dog classt, ami implementálja az interfészt
+    
+    //klasszikus objektumorientált programozásban csinálni kell egy Kutya classt, ami implementálja az interfészt
+    
+    Kutya buksi = new Kutya();
     megmorgat(buksi); 
 
-    // ha nem akarok csak ezért egy kutya osztályt csinálni, akkor jön a lambda:
+    // de ha nem akarok csak ezért egy kutya osztályt csinálni, akkor jön a lambda:
 
     MorogniKepes morog = (int hossz) -> {        //betesszük a kódot egy változóba, aminek a típusa az interface neve
       System.out.print("gr");
       for (int i=0; i<hossz; i++) System.out.print("r");
       System.out.println("");
     };                                           // return érték is megadható!
-    megmorgat(morog);                            //és megmorgatható a nélkül, hogy csináltunk volna egy kutyát hozzá!
+    megmorgat(morog(3));                         //és megmorgatható a nélkül, hogy csináltunk volna egy kutyát hozzá!
 
   }
 
 }
 
----
 
-
-Guba Krisztián féle lambda:
-
-public class TryLambda {
-
-  public static void main(String[] args) {
-
-    Udvozlo udvozlo = new Udvozlo() {             //anonimusz class
-      public String udv() { return "hello"; }
-    }
-
-    // ez felírható így is:
-
-    Udvözlo udvozlo = () -> "hello";   // a lambda mindig _csak_egy_metódus_
-
-    Collable<String> proba = () -> "hello";
-
-    Function<String,String> udvozlo = (String name) -> "BUÉK" + name + "!";   //a <> az egyik String a bemeneti paraméter, a másik String a visszatérési érték
-    System.out.println( udvozlo.apply("Krisz") );
-
-    BiFunction<String, Integer, Long> fuggveny = (String name, Integer number) -> name.length()+number+0L;         // string és int bemenet, long kimenet
-
-    Counter szamlalo = (String name, Integer number) -> name.length()+number+0L;
-
-
-  }
-
-}
 
 A lambda kifejezések használata új objektumokat hoz létre. Ha a lambda kontextusfüggő, akkor
 mindenképpen, hogyha nem kontextus függő, akkor elvileg a javagép escape analisys által 

@@ -1,0 +1,92 @@
+A java 8-ban megjelent funkcionális interface lehetősége ad arra, hogy metódusokat változóként adjunk át, mint a javascriptben. Pl.:
+
+class MessageService {
+
+    public void sendEmail(String message) {
+        //send the string in email.
+    }
+    
+    public void sendSMS(String message) {
+        //send the string in sms message.
+    }
+
+}
+
+
+class DoSomethingService {
+
+    public void something(Consumer<String> sendMessage)
+        //fill String text 
+        callback.accept(text);                          
+    }
+
+}
+
+és akkor meghívhatom így: 
+    doSomethingService.something(MessageService::sendEmail);
+    doSomethingService.something(MessageService::sendSMS);
+    
+    
+típusai:
+
+ Consumer típus, ha egy paramétert vár és void
+ Function típus, ha egy paramétert vár és egy paramétert visszaad
+ Supplier típus, ha nem vár paramétert, de visszaad egy értéket
+ Predicate típus, ha egy paramétert vár és booleant ad vissza
+ 
+ Léteznek BiConsumer, BiFunction BiPredicate típusok (két paraméterrel)
+ és tipusos változatok, mint BooleanSupplier, DoubleConsumer, DoubleFunction, 
+ DoublePredicate, DoubleSupplier, DoubleToIntFunction, DoubleToLongFunction  
+ amelyeknél a diamond operátor mellőzhető
+ 
+ 
+A funkcionális interface lambdával metóduson belül is deklarálható:
+
+public void process(Collection<Pair<Entity1, Entity2>> pairs) {
+   for (Pair<String, Integer> pair : pairs) {
+      Entity1 e1 = pair.getLeft();
+      Entity2 e2 = pair.getRight();
+
+      BiConsumer<Entity1, Entity2> setError = (Entity1 == null)
+         ? (e1, e2) -> { e2.setErrorState(); } 
+         : (e1, e2) -> { e1.setErrorState(); e2.setErrorState(); }         
+  
+      BiConsumer<Entity1, Entity2> save = (Entity1 == null)
+         ? (e1, e2) -> { e2Repository.save(e2) } 
+         : (e1, e2) -> { e1Repository.save(e1); e2Repository.save(e2); }         
+   
+      if (cond1) {
+         logger.error("a generális faliórája")
+         setError.accept(e1, e2);
+         save.accept(e1, e2);
+         continue;
+      }
+      
+      //do more
+      save.accept(e1, e2);
+   
+   }
+}
+
+Ez akkor hasznos, hogyha az adott ciklusban sokszor, sok helyen kellene megismételni egy programrészletet, 
+mint jelen példában a nullchecket kellene.
+
+
+A kifejezés típusellenőrzésre is felírható:
+
+	public void afterBackgroundService(Object arg) {
+
+		Function<Integer, String> generate = (arg instanceof String s) 
+				? (i) -> { return s.concat(i.toString()); }  //note: a típusellenőrzés megcsinálta a kasztolást is nekem :)
+				: (i) -> { return arg.toString().concat(i.toString()); };
+		
+        //do something				
+        
+        String a = generate.apply(3124);
+        
+        //do more
+        
+        String b = generate.apply(5646);
+       
+	}
+ 

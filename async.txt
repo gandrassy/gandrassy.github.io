@@ -39,15 +39,15 @@ is oly módon, hogy a metódust paraméterként adjuk át:
     }
     
     @Async
-    public void createTasks(Consumer<String> callback) {   //  Consumer típus, ha egy paramétert vár és void
-        //creating tasks                                   //  Function típus, ha egy paramétert vár és egy paramétert visszaad
-        String message = new ArrayList();                  //  Supplier típus, ha nem vár paramétert, de visszaad egy értéket
-        //fill message                                     // Predicate típus, ha egy paramétert vár és booleant ad vissza
+    public void createTasks(Consumer<String> callback) {
+        //creating tasks
+        String message = "Task creation completed."
+        //fill message
         callback.accept(message);                          
-    }                                                      // Léteznek BiConsumer, BiFunction BiPredicate típusok (két paraméterrel)
-                                                           // és tipusos változatok, mint BooleanSupplier, DoubleConsumer, DoubleFunction,  
-                                                           // DoublePredicate, DoubleSupplier, DoubleToIntFunction, DoubleToLongFunction    
-    public void sendEmail(String message) {                // amelyeknél a diamond operátor mellőzhető
+    }
+ 
+ 
+    public void sendEmail(String message) {
         //send the string in email.
     }
     
