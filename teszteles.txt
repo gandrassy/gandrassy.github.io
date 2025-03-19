@@ -134,3 +134,24 @@ public class MyClassTest {
     assertEquals(50, tester.multiply(10, 5));
   }
 } 
+
+
+
+Statikus void metódus mockolása:
+
+@Test
+public void emailtest() {
+
+    try (MockedStatic<javax.mail.Transport> transport = mockStatic(javax.mail.Transport.class) ) {
+    
+      transport.when( () -> javax.mail.Transport.send(any()) ).thenAnswer( Answer<Void> invocation -> {
+        java.mail.Message message = invocation.getArgument(0);
+        assertEquals("test@mail.ru", message.getRecipients(RecipientType.TO)[0].toString());
+        return null;
+      });
+      
+      assertDoesNotThrow( () -> emailService.sendAutomatedEmail(scheduledEmail) );
+    
+    }
+
+}
