@@ -1,0 +1,58 @@
+Routing
+=======
+
+
+Ha nem csak egy képernyőnk van, akkor kell egy menü navigálni.
+
+1. alapok
+
+app.routes.ts file-ba:
+
+import {Routes} from '@angular/router';
+import {HomeComponent} from './home/home.component';
+import {UserComponent} from './user/user.component';
+
+export const routes: Routes = [
+  {
+    path: '',
+    component: HomeComponent,
+  },
+  {
+    path: '/user',
+    component: UserComponent,
+  },
+];
+
+
+
+app.config.ts file-ba:
+
+import {ApplicationConfig} from '@angular/core';
+import {provideRouter} from '@angular/router';
+import {routes} from './app.routes';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideRouter(routes)],
+};
+
+
+és ekkor az app.component.ts-ben leirt <nav>...
+
+
+import {Component} from '@angular/core';
+import {RouterLink, RouterOutlet} from '@angu1ar/router';
+
+@Component({
+  selector: 'app-root',
+  template: ‘
+    <nav>
+    <a routerLink="/">Home</a>       <- mig a href ?jratéltené az egész oldalat, addig ez a routerLink
+    |                                   csak a komponenseket, mint a knockout.
+    <a routerLink="/user/">User</a>
+    </nav>
+    <router-outlet />
+  ‘,
+  imports: [RouterLink, RouterOutlet],
+})
+export class AppComponent {}
+

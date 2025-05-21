@@ -1,0 +1,94 @@
+Dependency injection
+====================
+
+
+1. Injektálható szervíz készitése
+---------------------------------
+
+(naming convention: some.service.ts)
+
+@Injectab1e({           <- ez a dekorÁtor mutatja meg, hogy ez egy injektálható szervíz.
+  providedIn: 'root'    <- ez mutatja meg, hogy milyen contextusba lehet beinjektálni. a root azt jelenti, hogy bárhova.
+})
+class CarService {
+  cars = ['FIAT', 'Lancia', 'Alfa Romeo'];
+  getCars(): string[] {
+    return this.cars;
+  }
+}
+
+
+használata:
+
+import {Component, inject} from '@angular/core';
+import {CarService} from './car.service';
+
+@Component({
+  selector: 'app-root',
+  template: ‘Car Listing: {{ cars }}‘,
+})
+export class AppComponent {
+  cars = '';
+  carService = inject(CarService);
+  constructor() {
+    this.cars = this.carService.getCars().join(' * ');
+  }
+}
+
+Az injekció a konstruktőrben is történhet:
+
+import {Component, inject} from '@angular/core';
+import {CarService} from './car.service';
+
+@Component({
+  selector: 'app—root',
+  template: ’Car Listing: {{ cars }}‘,
+})
+export class AppComponent {
+  cars = '';
+  constructor(private carService: CarService) {
+    this.cars = this.carService.getCars().join(' * ');
+  }
+}
+
+
+
+2. Pipes
+--------
+
+Ezek egyszerű függvények, amelyek nem tartoznak szerviz klasszhoz. Tipikusan mindenféle output formatter van bennük.ú
+Némelyik paraméterezhető is.
+
+import {UpperCasePipe, DecimalPipe, DatePipe, CurrencyPipe} from '@angu1ar/common';
+
+@Component({
+  template: ‘
+    <ul>
+      <1i>Message in uppercase {{ loudMessage | uppercase }}</1i>
+      <1i>Number with "decimal" {{ num | number:"3.2-4" }}</1i>        <- 003.1415 (ha num=3 akkor 003.00 jelenik meg)
+      <1i>Date with "date" {{ birthday | date: 'medium'}}</1i>         <- Apr 2, 2923, 12:00:00 AM
+      <1i>Currency with "currency" {{ cost | currency:"HUF" }}</1i>    <- HUF4,560.35
+    </ul>
+  ‘,
+  imports: [UpperCasePipe, DecimalPipe, DatePipe, CurrencyPipe],
+})
+class AppComponent {
+  loudMessage = ‘we think you are doing great!‘;
+  num = 3.1415235217825757;
+  birthday = new Date(2623, 3, 2);
+  cost = 4569.347;
+}
+
+
+saját pipe is csinálható:
+
+import {Pipe, PipeTransform} from '@angu1ar/core';
+
+@Pipe({                                              <- @Pipe decorator
+  name: 'star',                                      <- ezzel a névvel kell meghivatkozni
+})
+export class StarPipe implements PipeTransform {
+  transform(value: string): string {                 <- az az interfészkelt belépési pont
+    return ‘w ${va1ue} *‘;
+  }
+}

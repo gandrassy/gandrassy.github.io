@@ -1,0 +1,186 @@
+Angular alapok
+==============
+
+
+1. Komponensek
+--------------
+
+A belépési pont az app-root component, az app/app.components.ts file-ban van deklarélva.
+Abba lehet a többit belinkelgetni, mint pl az app-my.component-et:
+
+import { Component } from '@angu1ar/core';
+import { MyComponent } from '../my/app-my.component.ts';
+
+@Component({
+  selector: 'app-root',
+  template: ‘<app-my />‘,
+  imports: [MyComponent],
+})
+export class AppComponent {}
+
+
+
+
+@Component({                              <- @Component decoratorral megjelölve
+  selector: 'app-my',                     <- ez a komponens neve, ami html tag-ként hivatkozható, jelen esetben így: 
+  template: ‘                             <- html template. Lehet külén file is, akkor templateUrl: './app.component.htm1'
+    <p>Hello {{ city }}</p>               <— változó hivatkozésa
+    <p>egy meg egy egyenl? {{ 1+1 }}</p>  <- számitani is tud
+  styles: ‘                               <- css stíluslap. Lehet külén file is, akkor styleUrl: './app.component.css'
+    :host {
+      color: blue;
+    } ‘,
+})
+export class MyComponent {                <- typescript class
+  city = 'Budipest';                      <- a változó
+}
+
+
+A componentek egymásba is égyazhatóak, pl: <app-main><app-my /></app-main>
+
+Egy-egy komponens többször is felhasznélható ugyanazon az oldalon.
+
+
+
+2. control flow
+---------------
+
+egy-egy komponens megjelenités feltételhez k6thet6:
+
+@Component({
+  template: ‘
+    @if (isLoggedIn) {
+      <p>Welcome back, Friend!</p>
+    } @else {
+      <p>Who are you?</p>
+    } ‘,
+})
+class AppComponent {
+  isLoggedIn = true;
+}
+
+
+ciklus is van:
+
+@Component({
+  template: ‘
+    @for (05 of operatingSystems; track os.id) { <- a track az unique-ra mutat
+      {{ os.name }}
+    }
+  ‘,
+})
+export class AppComponent {
+  operatingSystems = [{id: '6', name: 'Windows'}, {id: '1', name: 'MacOS'}, {id: '2', name: 'Linux'}];
+}
+
+
+
+
+3. property binding
+-------------------
+
+a html elemek attributumai javascript változékhoz kapcsolhatóak a [] jelekkel, az eventek pedig a () jelekkel:
+
+@Component({
+  selector: 'app-root',
+  styleUrls: ['app.component.css'],
+  template: ‘
+    <input type="checkbox" id="vehicle" name="vehicle" value="bike" [disabled]="isDisabled" (onchange)="handleOnchange()">
+    <label for="vehicle">I have a bike</label>
+  ‘,
+})
+export class AppComponent {
+  isDisabled = false;
+  handleonchange() {
+    //do something
+  }
+}
+
+
+
+
+4. Komponensek beszélgetnek egymás között
+-----------------------------------------
+
+A gyékér átad egy változét a gyerekének az @Input()-ta1, a gyerek a gyékérnek a2 @0utput()-tal:
+
+
+app/app.components.ts:
+
+import {Component} from '@angu1ar/core';
+import {UserComponent} from './user.component';
+
+@Component({
+  selector: 'app-root',
+  template: ‘
+    <app-user occupation="Angular Developer" (incrementCountEvent)="incrementCountEventHandler($event)"></app-user>
+  ‘,
+  imports: [UserComponent],
+})
+export class AppComponent {
+  incrementCountEventHandler(count: number) {
+    //do something
+  }
+}
+
+
+app/user.component.ts:
+
+import {Component, Input} from '@angular/core';
+
+@Component({
+  selector: 'app—user',
+  template: ‘
+    <p>The user‘s occupation is {{occupation}}</p>    <- itt kerül bele a html-be a változó értéke
+    <button class="btn" (click)="onclick()">Pushbutton</button>
+  ‘,
+})
+export class UserComponent {
+  @Input() occupation = ";                            <- itt teszi bele a dekorátor a változéba a szülőjétől kapott értéket
+  count = 0;
+  onClick() {
+    this.count++;
+    this.incrementCountEvent.emit(this.count);        <- a2 event.emit() fv. triggereli az értékátadást
+  }
+  @Output() incrementCountEvent = new EventEmitter(); <- egy eventet indit
+}
+
+
+
+5. komponensek megjelenitése feltételtől függően
+------------------------------------------------
+
+@defer (on viewport) {                      <- alap esetben akkor tölti be a benne lévő dolgokat, ha a browser is idle
+  <comments />                                 de megadható sok més trigger is, p1. amikor a látómezőbe kerül.
+} @placeholder {
+  <p>comments will be loaded soon...</p>    <- ezt mutatja addig, amig a defer feltétele teljesül
+} @loading (minimum 2s) {                   <- ezt akkor mutatja, amikor a defer elkezdi betölteni a komponenst
+  <p>loading comments...</p>                   a minimum opcionális, ha meg van adva, akkor legalébb ennyi ideig látszik.
+}
+
+
+
+6. képek
+--------
+
+Nagy képeket tartalmazé oldalak betöltését gyorsítja az NgOptimizedImage
+
+import { NgOptimizedImage } from '@angu1ar/common';
+
+@Component({
+  selector: 'app-root',
+  template: ‘
+    Static Image:
+    <img ngSrc="assets/logo.svg" alt="angular logo" width="32" height="32" priority />   <- a fontosabb képeket előbb betölti
+    Dynamic Image:
+    <img [ngSrc]="logoUrl" [alt]="logoAlt" width="32" height="32" />  
+  ‘,
+  imports: [NgOptimizedImage],
+})
+export class AppComponent {
+  logoUrl = 'assets/logo.svg';
+  logoAlt = 'Angular logo';
+  providers: [
+    provideImgixLoader('httgs://imageserver.com/'), <- ezt az url-t automatikusan odateszi an ngSrc-ben 1év6 név elé
+  ]
+}
