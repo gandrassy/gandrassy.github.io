@@ -1,0 +1,304 @@
+Áttekintés: Mit kell csinálni?
+
+1. Saját TrustManager-t kell konfigurálnod, amely CRL-fájllal ellenőriz.
+
+2. Létre kell hozni egy SSLContext-et ezzel a TrustManagerrel.
+
+3. Ezt az SSLContext-et kell használnia a Spring Boot/Tomcat-nek.
+
+
+
+
+1.
+
+
+public class CRLTrustManagerFactory {
+
+    public static SSLContext createSSLContextWithCRL(File trustStoreFile, String trustStorePassword, File crlFile) throws Exception {
+        // TrustStore betöltése
+        KeyStore trustStore = KeyStore.getInstance("JKS");
+        try (InputStream trustStream = new FileInputStream(trustStoreFile)) {
+            trustStore.load(trustStream, trustStorePassword.toCharArray());
+        }
+
+        // CRL betöltése
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        X509CRL crl;
+        try (InputStream crlStream = new FileInputStream(crlFile)) {
+            crl = (X509CRL) certFactory.generateCRL(crlStream);
+        }
+
+        // CertStore létrehozása a CRL alapján
+        Collection<? extends CRL> crls = List.of(crl);
+        CertStore crlStore = CertStore.getInstance("Collection", new CollectionCertStoreParameters(crls));
+
+        // TrustAnchors beállítása
+        PKIXBuilderParameters pkixParams = new PKIXBuilderParameters(trustStore, new X509CertSelector());
+        pkixParams.setRevocationEnabled(true);
+        pkixParams.addCertStore(crlStore);
+
+        // TrustManagerFactory létrehozása
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
+        tmf.init(new CertPathTrustManagerParameters(pkixParams));
+
+        // SSLContext létrehozása
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, tmf.getTrustManagers(), null);
+
+        return sslContext;
+    }
+}
+
+
+
+2.
+
+@Configuration
+public class CustomSslConfig {
+
+    @Bean
+    public TomcatServletWebServerFactory servletContainer() {
+        return new TomcatServletWebServerFactory() {
+            @Override
+            protected void customizeSsl(Connector connector, Ssl ssl) {
+                try {
+                    SSLContext sslContext = CRLTrustManagerFactory.createSSLContextWithCRL(
+                        new File("/opt/truststore.jks"),
+                        "truststorePassword",
+                        new File("/opt/my-ca.crl")
+                    );
+
+                    // Alkalmazd az SSLContext-et
+                    connector.setProperty("sslImplementationName", "org.apache.tomcat.util.net.jsse.JSSEImplementation");
+                    ((AbstractHttp11JsseProtocol<?>) connector.getProtocolHandler())
+                            .setSslContext(sslContext);
+
+                } catch (Exception e) {
+                    throw new IllegalStateException("Nem tudtam SSLContext-et beállítani CRL-lel", e);
+                }
+            }
+        };
+    }
+}
+
+
+
+
+
+3.
+
+
+Fontos fájlok a szerveren:
+/opt/truststore.jks – tartalmazza a megbízható CA-k tanúsítványait.
+
+/opt/my-ca.crl – a CRL fájl, amit a CA bocsátott ki. Lehet több is, ha több CA van.
+
+
+
+Megjegyzések:
+Ha több CRL-ed van, akkor egyszerűen a CollectionCertStoreParameters-be több CRL-t is betehetsz.
+
+Az OCSP ellenőrzéshez hasonló, de külön konfiguráció kell.
+
+A Tomcat sslContext override nem teljesen dokumentált, de működik a modern Spring Boot verziókban.
+
+Érdemes a CRL fájlokat valamilyen rendszerrel (pl. cron + curl) frissíteni időközönként.
+
+
+
+
+Alternatíva: Jetty vagy Undertow
+Ha nem Tomcatet használsz, hanem Jetty-t vagy Undertow-t, ott más módon kell injektálni az SSLContext-et — tudok abban is segíteni.
+
+
+
+
+
+
+Példa alkalmazás:
+=================
+
+spring-mtls-crl/
+├── src/
+│   └── main/
+│       ├── java/
+│       │   └── com/example/mtls/
+│       │       ├── MtlsApplication.java
+│       │       ├── config/CustomSslConfig.java
+│       │       └── ssl/CRLTrustManagerFactory.java
+│       └── resources/
+│           └── application.yml
+├── pom.xml
+
+
+
+
+pom.xml:
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" ...>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>spring-mtls-crl</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>spring-mtls-crl</name>
+
+  <properties>
+    <java.version>17</java.version>
+    <spring-boot.version>3.2.0</spring-boot.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+
+
+
+
+application.yml:
+
+server:
+  port: 8443
+  ssl:
+    enabled: true
+    client-auth: need
+    key-store: classpath:keystore.p12
+    key-store-password: changeit
+    key-store-type: PKCS12
+    trust-store: classpath:truststore.jks
+    trust-store-password: changeit
+    trust-store-type: JKS
+
+
+Megjegyzés: ezeket az értékeket felülírjuk a CustomSslConfig-ben, de a Spring Boot ettől még elindul.
+
+
+
+MtlsApplication.java
+
+package com.example.mtls;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.*;
+
+@SpringBootApplication
+@RestController
+public class MtlsApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(MtlsApplication.class, args);
+    }
+
+    @GetMapping("/secure")
+    public String secureEndpoint() {
+        return "Sikeres mTLS hitelesítés!";
+    }
+}
+
+
+
+
+
+CRLTrustManagerFactory.java
+
+package com.example.mtls.ssl;
+
+import javax.net.ssl.*;
+import java.io.*;
+import java.security.KeyStore;
+import java.security.cert.*;
+import java.util.List;
+
+public class CRLTrustManagerFactory {
+
+    public static SSLContext createSSLContextWithCRL(File trustStoreFile, String password, File crlFile) throws Exception {
+        KeyStore trustStore = KeyStore.getInstance("JKS");
+        try (InputStream in = new FileInputStream(trustStoreFile)) {
+            trustStore.load(in, password.toCharArray());
+        }
+
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        X509CRL crl;
+        try (InputStream crlIn = new FileInputStream(crlFile)) {
+            crl = (X509CRL) certFactory.generateCRL(crlIn);
+        }
+
+        CertStore certStore = CertStore.getInstance("Collection",
+                new CollectionCertStoreParameters(List.of(crl)));
+
+        PKIXBuilderParameters pkixParams = new PKIXBuilderParameters(trustStore, new X509CertSelector());
+        pkixParams.setRevocationEnabled(true);
+        pkixParams.addCertStore(certStore);
+
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
+        tmf.init(new CertPathTrustManagerParameters(pkixParams));
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, tmf.getTrustManagers(), null);
+        return sslContext;
+    }
+}
+
+
+
+
+
+customSSLConfig.java:
+
+
+package com.example.mtls.config;
+
+import com.example.mtls.ssl.CRLTrustManagerFactory;
+import org.apache.catalina.connector.Connector;
+import org.apache.coyote.http11.AbstractHttp11JsseProtocol;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.context.annotation.*;
+
+import java.io.File;
+
+@Configuration
+public class CustomSslConfig {
+
+    @Bean
+    public TomcatServletWebServerFactory servletContainer() {
+        return new TomcatServletWebServerFactory() {
+            @Override
+            protected void customizeSsl(Connector connector, org.springframework.boot.web.server.Ssl ssl) {
+                try {
+                    var sslContext = CRLTrustManagerFactory.createSSLContextWithCRL(
+                            new File("/opt/truststore.jks"),
+                            "changeit",
+                            new File("/opt/my-ca.crl")
+                    );
+
+                    connector.setProperty("sslImplementationName", "org.apache.tomcat.util.net.jsse.JSSEImplementation");
+
+                    var handler = (AbstractHttp11JsseProtocol<?>) connector.getProtocolHandler();
+                    handler.setSslContext(sslContext);
+
+                } catch (Exception e) {
+                    throw new IllegalStateException("Nem tudtam beállítani SSLContext-et CRL ellenőrzéssel", e);
+                }
+            }
+        };
+    }
+}
+
+
+Futtatás
+Helyezd el a truststore.jks és my-ca.crl fájlokat az /opt/ mappába (vagy módosítsd az elérési útvonalat).
+
+Ha a tanúsítvány vissza van vonva, akkor a kapcsolat elutasításra kerül még azelőtt, hogy a Spring Security egyáltalán belépne a képbe.
