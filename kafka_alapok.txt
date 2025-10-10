@@ -1,0 +1,130 @@
+Apache Kafka
+============
+
+
+Mi ez? Egy olyan szerver, amely különböző forrásokból érkező adatokat gyűjt össze, és különböző feldolgozók számára elérhetővé tesz.
+Nagy komplexitású rendszerek aszinkron kommunikációja valósítható meg általa. A kafka jól skálázható, megfelelően konfigurált cluester 
+latenciája minimális, századmásodperces nagyságrendű. 
+A kafka stream elemeinek sorrendje mindig azonos lesz, minden elem inmutable, nem módosítható, így az adatok visszakereshetőek, és ez 
+által megállapítható, hogy egy célrendszer pontosan milyen események hatására került egy bizonyos állapotba.
+
+A kafka streamek tartalma elérhetőek egy SQL szerű felületen is, amelynek a neve "ksqlDB"
+A kafka connect source / kafka connect sink kiegészítől által adatbázisok duplikálására is használható.
+
+Eredetileg a LinkedIn fejlesztette javaban, 2011-ben, de ma már public domain, és mindenféle kliens létezik hozzá.
+Tipikus felhasználási területei az üzenetküldés, aktivitások követése (pl. taxik mozgásának követése a diszpécser központból),
+és a telemetria.
+
+Fontos megjegyezni, hogy bár a terminológiában "event streamingként" szerepel, de ez valójában csak egy queue, nem igazi eseményvezérelt
+rendszer, így hát nem garantált az, hogy a kafkába betöltött kritikus események azonnali reakciót váltanának ki a konzumerekből.
+
+
+fogalmak:
+
+Topic
+-----
+Logkailag összetartozó adatok gyűjteménye.
+Az adatok a Kafkán belül bináris formátumban vannak tárolva, bevételezéskor és kimenetkor serializálják. A típus lehet Avro, Protobuff
+vagy Json is, de custom serializer/deserializer készíthető, e célra a kafka interface classokat biztosít, amiket tetszés szerint lehet 
+implementálni.
+A topicok particionálhatóak és prioritizálhatóak is.
+Az adatcsere és -tárolás unencripted!
+
+Schema Registry
+---------------
+A használt adattípusok általános leírása.
+
+Key
+---
+Az adatok egy olyan jellemzője, amit a streamek particionálására tudunk felhasználni. Példának okáért egy multinacionális webshop key-e
+lehet az ország, ahova az árut rendelték, és így a leányvállalatok raktárai külön-külön streameket fogyasztanak, amelyekben csak olyan
+megrendelések vannak, amelyeket őnekik kell kiszolgálni.
+Ha nincs key definiálva, akkor a beérkező elemek load balancing alapján, véletlenszerűen kerülnek egyik vagy másik particióra, így hát 
+ha a feldolgozás sorrendje lényeges, akkor az azonos típusú objektumoknak azonos particióra kell kerülniük.
+Természetesen kis adatmennyiségnél nem kötelező particionálni.
+
+Producer
+-------- 
+Ez egy adatokat emiattáló kliens. Jellemzően egy bizonyos topicba tartozó adatokat emittál, amelyek származhatnak épp úgy felhasználói
+interakciókból (webshop rendelés), mint periodikus mérésekből (pl. hőmérséklet monitorozás egy fagyasztókamrában), vagy triggerelheti őket
+különleges esemény (pl. tűzjelző).
+A producer kaphat visszajelzést arról, hogy a kafka clusterbe sikerült-e lementeni amit beküldött. Amennyiben a brókerek közt redundancia
+van (lásd később), beállítható úgy is, hogy csak akkor kapja meg, amikor már minden felelős bróker sikeresen mentette az adatot.
+(acknowledgement:all beállítás.)
+
+Consumer
+--------
+Ez a kafka clusterből adatokat lekérő és feldolgozó rendszer. Általában egy topic egy particióját fogyasztja. Ilyen lehet a raktár 
+rendeléseket összeállító és postázó részlege, amely csak a saját országának particióját olvassa, ilyen lehet valamilyen vizuális
+tájékoztató rendszer, pl a hűtőkamra elmúlt 48 órai hőmérsékletváltozását egy monitoron grafikusan megjelenítő mikroszerviz, vagy
+akár valami beavatkozó rendszer, mondjuk ami tűzriadó esetén leállítja az szellőztető rendszert és a lifteket.
+Ugyanazokat az objektumokat több különböző konzumer is kiolvashatja a kafkából, hogy melyik-melyik hol tart a feldolgozásban, azt 
+külön-külön tartja nyilván a cluster. A konzumernek tehát submitelnie kell az objektum offsetjét feldolgozás után. Ha a feldolgozás
+közben a konzumer megdöglik, és nem submitolja az új offsetet, akkor újra meg újra meg újra ugyanazt az objektumot fogja megkapni
+a kafkából, amelyen megdöglött. Ebből kifolyólag:
+ - a runtime exceptionokat is le kell kezelni, különben végtelen ciklusba kerül a consumer!
+ - a feldolgozás idempotens kell legyen, vagyis ha egy kafka objektumot már sikeresen feldolgozott a konzumer, de közvetlenül az
+   új offset beállítása előtt újraindult, akkor ugyanazt az objektumot újra megkapva ne kerüljön más állapotba. Vagyis a toggle meg
+   incredentate patternek erőst kerülendők!
+
+Consumer group
+--------------
+A konzumerek csoportokba vannak rendezve, amely csoportok egy-egy topichoz kapcsolódnak.
+Egy konzumer csoporton belül minden egyes particióhoz csak egy konzumer tartozhat, de egy-egy konzumer több particiót is olvashat.
+Egy másik konzumer groupon belüli konzumer viszont olvashatja ugyanazt a particiót, amit az egyik konzmer group valamelyik konzumere 
+is olvas.
+
+
+Broker
+------
+A kafka clusteren belül egy szerver. Egy vagy több topic egy vagy több particióját tartalmazza. Szükség esetén akár többszáz vagy
+többezer bróker is lehet egy clusterben.
+A brokerek alapból nem védettek adatvesztés ellen, ezért érdemes reduncanciát felállítani. Erre szolgál a "replication factor"
+beállítás, ami egy szám, amelyel azt mutatja, hogy az adott particióból hány brókernél legyen példány. Tehát 2 beállítása esetén
+egy mirror van, 3 esetén 2 mirror stb. Nyilván e szám nem lehet több, mint az összes brokerek száma.
+
+
+
+
+Kommunikáció a klienssel
+========================
+
+A kafka http helyett tcp-n keresztülkommunikál. Ha mégis http-n keresztül akarjuk elérni, akkor REST PROXY vagy KAFKA BRIDGE kell.
+
+
+producer oldalon:
+
+1. A kommunikáció egy un broker discovery protokollal kezdődik, amiben a producer beküldi a metaadatokat valamelyik (bármelyik) brókernek,
+aki válaszul elküldi az adott adatra illetékes brókerek listáját. Ezt egyes kafka kliensek automatikusan intézik.
+
+2. A kliens beküldi valamelyik brókernek az adatot.
+
+3. A bróker nyugtázza az adat átvételét, a producer eldobja az objektumot.
+
+
+consumer oldalon:
+
+1. A consumer kérést intéz a szerver felé, hogy a következő objektumot küldje el
+
+2. A bróker elküldi neki az objektumot.
+
+3. Ha az objektum fedolgozása sikeres volt, a consumer submitolja az új offsetet. 
+   Ha a feldolgozás sikertelen, akkor nem teszi, és a következő kérésre újra ugyanazt az objektumot kapja.
+   Az esetleges korábbi, részleges feldolgozás során előállt rendellenes állapotot a consumernek kell lekezelnie!
+
+
+
+Az adatforgalom teljesen unencrypted mindkét oldalon, de SSL bekonfigurálható.
+SSL authentikáció szintén, és Topic, Consumer group és Cluster szintű hozzáférési jogokat ezzel lehet beállítani (ez az "ACL")
+
+Kerberos authentikáció is van benne, de állítólag nem túl jól sikerült implementáció, jobb messze elkerülni.
+
+Cluster üzemeltetés:
+- kubernetes, opeator pattern
+- Strimzi
+
+
+demo project: github.com/dtaskai/kafka-hwsw
+
+
+
