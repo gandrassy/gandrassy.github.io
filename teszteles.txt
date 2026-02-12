@@ -1,16 +1,16 @@
 Unit test:
 ---------
-Egy funkcióra (mondjuk egy függvényre) vonatkozik.
-Junit vagy TestNG
+Egy funkcióra (tipikusan egy metódusra) vonatkozik.
 
 Integration test
 ----------------
-A szoftver különböző részeinek interakcióját teszteli.
+A szoftver különböző részeinek interakcióját teszteli. 
+Például egy rest endpointra beküldött adat az elvárt választ váltja-e ki?
+Akár több különböző klassz számos metódusa is lehet mögötte, nem számít, itt csak a végeredmény fontos.
 
 Funkcionális test
 -----------------
-komplex program rendeltetésszerű használata, aka beta test
-Selenium
+Komplex program rendeltetésszerű használata. Lehet automatizált (Selenium) vagy user teszt. aka beta test
 
 Stress test
 -----------
@@ -47,19 +47,19 @@ A hívó teszt sikertelen futását eredményezi
 assertTrue([message,] boolean condition) or assertFalse
 Ellenörzi, hogy a megadott feltétel igaz (hamis) – e.
 
-assertEquals([message,] expected, actual)
-Ellenőrzi, hogy két objektum egyenlő-e.
-
 assertNull([message,] obj) or NotNull
 Egy Objektum null (nem null).
 
+assertEquals([message,] expected, actual)
+Ellenőrzi, hogy két objektum egyenlő-e az expected.equals() paraméter szerint.
+
 assertSame([message,] expected, actual) or assertNotSame
-Ellenőrzi, hogy két változó ugyanarra az objektumra mutat (==). 
+Referencia típusú objektumoknál használatos, azt ellenőrzi, hogy két változó pontosan ugyanarra a memóriacímre mutat-e? 
 
 
 Megadható egy 
 
-   @Before
+   @Before (Junit5-ben @BeforeEach)
    public void before() {
    }
 
@@ -67,7 +67,7 @@ is. Ez minden egyes tesz előtt lefut, ide ki lehet írni a közös kódot, pl. 
 
 Párja az
 
-  @After
+  @After (Junit5-ben @AfterEach)
    public void after() {
    }
 
@@ -75,7 +75,7 @@ Ide kerülhet pl. a sout( appletree.toString() );
 
 van ilyen is:
 
-  @BeforeClass
+  @BeforeClass (Junit5-ben @BeforeAll)
    public void beforeClass() {
    }
 
@@ -89,9 +89,6 @@ párja az
 
 általában valami
 
-Junit5-ben az annotációk nevét megváltoztatták: beforeAll/afterAll, beforeEach/afterEach
-
-
 
 További annotációk:
 
@@ -104,7 +101,7 @@ A teszt sikertelen a megadott típusú kivétel hiányában
 @Test(timeout=100) 
 A teszt sikertelen, ha a metódus mem fejeződik be adott idő alatt
 
-@Ignore or @Ignore("Why disabled") 
+@Ignore or @Ignore("Why disabled") (Junit5-ben @Disabled)
 Adott teszt metódus kihagyása
 
 
@@ -137,21 +134,67 @@ public class MyClassTest {
 
 
 
-Statikus void metódus mockolása:
+Statikus void metódus mockolása: (Junit5)
+=========================================
 
 @Test
 public void emailtest() {
 
-    try (MockedStatic<javax.mail.Transport> transport = mockStatic(javax.mail.Transport.class) ) {
+    try (MockedStatic<Transport> transport = mockStatic(Transport.class) ) {
     
-      transport.when( () -> javax.mail.Transport.send(any()) ).thenAnswer( Answer<Void> invocation -> {
-        java.mail.Message message = invocation.getArgument(0);
-        assertEquals("test@mail.ru", message.getRecipients(RecipientType.TO)[0].toString());
-        return null;
-      });
+        transport.when( () -> Transport.send(any()) ).thenAnswer( Answer<Void> invocation -> {
+            java.mail.Message message = invocation.getArgument(0);
+            assertEquals("test@mail.ru", message.getRecipients(RecipientType.TO)[0].toString());
+            return null;
+        });
       
-      assertDoesNotThrow( () -> emailService.sendAutomatedEmail(scheduledEmail) );
+        assertDoesNotThrow( () -> emailService.sendAutomatedEmail(scheduledEmail) );
     
     }
 
 }
+
+
+Konstruktőr mockolása: (Junit5)
+===============================
+
+Hasonlóan kell mockolni azt, ha a tesztelendő metódusban egy osztályt példányosítanak.
+
+Tegyük fel, hogy a tesztelendő metódusunk a dbService-ben van, és így néz ki:
+
+public ObjectId saveNewEntity(String name, int phoneNo) throws dataBaseAccessException {
+    PhonebookEntity phonebookEntity = new PhonebookEntity(name, phoneNo);
+    phonebookEntity.setStatus(Status.CREATED);
+    phonebookEntity = phonebookRepository.save(phonebookEntity);
+    return phonebookEntity.getId();
+}
+
+
+erre a tesztet így írjuk:
+
+
+@Test
+void testSaveEntity() {
+    DbService dbService = new DbService();
+    DbRepository mockRepo = mock(DbRepository.class);
+    when(mockRepo.save(any(PhonebookEntity.class))).thenAnswer(invocation -> {
+        PhonebookEntity pbe = (PhonebookEntity) invocation.getArgument(0);
+        pbe.setId(new ObjectId(1234567890abcdef12345678));
+        return pbe;
+    });
+    ReflectionTestUtils.setField(dbService, "phonebookRepository", mockRepo);
+    try (MockedConstruction<PhonebookEntity> mocked = mockConstruction(PhonebookEntity.class, (mock, context) -> {
+                                List<?> constructorArgs = context.arguments();
+                                assertEquals("Mr. John Doe", constructorArgs.get(0));
+                                assertEquals(3616302130, constructorArgs.get(1)); 
+                            })) {
+        ObjectId oid = assertDoesNotThrow(() -> dbService.saveNewEntity("Mr. John Doe", 3616302130));
+        assertEquals(new ObjectId(1234567890abcdef12345678), oid);
+        List<PhonebookEntity> constructed = mocked.constructed();
+        assertEquals(1, constructed.size());
+        verify(constructed.get(0), times(1)).setStatus(Status.CREATED);
+        verify(mockRepo, times(1)).save(constructed.get(0));
+    }
+}
+                    
+
