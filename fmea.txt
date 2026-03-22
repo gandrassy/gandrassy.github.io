@@ -1,0 +1,48 @@
+Az FMEA protokoll
+
+
+A NASA és az amerikai hadsereg nem véletlenül fejlesztette ki 1949-ben az FMEA (Failure Mode and
+Effects Analysis) módszertant. Ha ők nem lőttek ki rakétát kockázatszámítás nélkül, te se indíts 
+el egy projektet vakon.
+
+
+Ha a főnök erőltet egy szakmailag védhetetlen döntést, ne vitatkozz, és ne kezdj el érzelmeskedni. 
+Számszerűsítsd a katasztrófát egy emailben (RPN - Risk Priority Number számítással):
+
+🛡️ 1. Súlyosság (Severity - 1-10): Mekkora a baj, ha beüt a hiba? 
+🛡️ 2. Előfordulás (Occurrence - 1-10): Milyen gyakran történhet meg? 
+🛡️ 3. Észlelhetőség (Detection - 1-10): Észrevesszük-e a hibát, vagy vakon megy ki a piacra? 
+
+(Minél rosszabb a teszt, annál magasabb a szám).
+
+RPN = S × O × D.
+
+És itt dől el minden, de nem érzés alapján,
+hanem számokkal alátámasztva:
+
+A taktikai válaszcsapás: "Vezetőm, mérnöki szemmel a jelenlegi kockázat: Súlyosság (9 - kritikus 
+leállás) × Előfordulás (8 - magas esély) × Észlelhetőség (10 - zéró teszt miatti vakság) = RPN 720.
+A maximum 1000-ből. Ez kőkemény, fekete zóna. Ezt a lépést kizárólag a te írásos utasításodra és a
+te felelősségedre hajtom végre."
+
+A pszichológia és a matematika itt összeér. Amikor a menedzser meglátja a számszerűsített kockázatot
+és a felelősség hivatalos áthárítását, senki nem meri majd aláírni az RPN 720-t. Azonnal visszakozni
+fognak.
+
+Az ipari szabványok (autóipar, repülőgépipar, Lean Six Sigma) alapján a zónák határértékei a 
+következők:
+
+🟢 RPN 1–100 (Zöld): Elfogadható kockázat, a rendszer stabil, elegendő a folyamatos monitorozás.
+
+🟡 RPN 101–300 (Sárga): Figyelmeztető zóna. Fennakadást okozhat, kötelező a cselekvési terv kidolgozása.
+
+🔴 RPN 301–500 (Vörös): Kritikus hibaarány. A projekt nem mehet élesbe, azonnali beavatkozás és
+                        újratervezés szükséges.
+
+⚫ RPN 500–1000 (Fekete): Katasztrófa (leállás, per). Teljes "Stop" és azonnali korrekció kötelező.
+
+
+Van egy rejtett szabály az FMEA-ban, amit a profi mérnökök használnak: A Súlyosság (Severity) felülír
+mindent. Ha a Súlyosság 9-es vagy 10-es (vagyis a hiba életveszélyes, jogi következménnyel jár vagy
+leállítja a céget), akkor teljesen mindegy, hogy az összesített RPN csak 90. A 9-es vagy 10-es
+Súlyosság automatikusan kötelező beavatkozást von maga után.
