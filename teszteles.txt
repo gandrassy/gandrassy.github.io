@@ -155,6 +155,13 @@ public void emailtest() {
 }
 
 
+MockedSpy így készíthető:
+
+try (MockedStatic<Transport> transport = mockStatic(Transport.class, CALLS_REAL_METHODS) ) {
+...
+}
+
+
 Konstruktőr mockolása: (Junit5)
 ===============================
 
@@ -187,6 +194,9 @@ void testSaveEntity() {
                                 List<?> constructorArgs = context.arguments();
                                 assertEquals("Mr. John Doe", constructorArgs.get(0));
                                 assertEquals(3616302130, constructorArgs.get(1)); 
+                                when(mock.setStatus(any()).thenAnswer(invocation -> {
+                                   assertEquals(Status.CREATED, invocation.getArgument(0));
+                                });
                             })) {
         ObjectId oid = assertDoesNotThrow(() -> dbService.saveNewEntity("Mr. John Doe", 3616302130));
         assertEquals(new ObjectId(1234567890abcdef12345678), oid);
